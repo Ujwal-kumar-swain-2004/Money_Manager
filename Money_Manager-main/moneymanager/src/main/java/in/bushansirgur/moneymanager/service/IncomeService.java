@@ -91,6 +91,10 @@ public class IncomeService {
         entity.setIcon(dto.getIcon());
         entity.setAmount(dto.getAmount());
         entity.setDate(dto.getDate());
+        entity.setPaymentMethod(dto.getPaymentMethod());
+        entity.setNotes(dto.getNotes());
+        entity.setTags(dto.getTags());
+        entity.setReceiptUrl(dto.getReceiptUrl());
         entity.setProfile(profile);
         entity.setCategory(category);
         return entity;
@@ -105,6 +109,10 @@ public class IncomeService {
         dto.setCategoryName(entity.getCategory() != null ? entity.getCategory().getName() : "N/A");
         dto.setAmount(entity.getAmount());
         dto.setDate(entity.getDate());
+        dto.setPaymentMethod(entity.getPaymentMethod());
+        dto.setNotes(entity.getNotes());
+        dto.setTags(entity.getTags());
+        dto.setReceiptUrl(entity.getReceiptUrl());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;

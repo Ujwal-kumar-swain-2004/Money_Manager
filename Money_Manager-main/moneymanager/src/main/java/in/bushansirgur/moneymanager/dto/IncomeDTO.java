@@ -14,6 +14,10 @@ public class IncomeDTO {
     private Long categoryId;
     private BigDecimal amount;
     private LocalDate date;
+    private String paymentMethod;
+    private String notes;
+    private String tags;
+    private String receiptUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -71,6 +75,38 @@ public class IncomeDTO {
 
     public void setDate(LocalDate date) {
         this.date = date;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getReceiptUrl() {
+        return receiptUrl;
+    }
+
+    public void setReceiptUrl(String receiptUrl) {
+        this.receiptUrl = receiptUrl;
     }
 
     public LocalDateTime getCreatedAt() {

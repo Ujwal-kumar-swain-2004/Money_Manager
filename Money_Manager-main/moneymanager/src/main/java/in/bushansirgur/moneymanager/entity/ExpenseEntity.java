@@ -23,6 +23,11 @@ public class ExpenseEntity {
     private String icon;
     private LocalDate date;
     private BigDecimal amount;
+    private String paymentMethod;
+    @Column(length = 1000)
+    private String notes;
+    private String tags;
+    private String receiptUrl;
 
     @Column(updatable = false)
     @CreationTimestamp
@@ -83,6 +88,38 @@ public class ExpenseEntity {
 
     public void setAmount(BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
+    }
+
+    public String getTags() {
+        return tags;
+    }
+
+    public void setTags(String tags) {
+        this.tags = tags;
+    }
+
+    public String getReceiptUrl() {
+        return receiptUrl;
+    }
+
+    public void setReceiptUrl(String receiptUrl) {
+        this.receiptUrl = receiptUrl;
     }
 
     public LocalDateTime getCreatedAt() {
