@@ -1,7 +1,7 @@
 import logo from "./logo.png";
 import login_bg from "./login-bg.png";
 import landing from "./landing.png";
-import {Bot, Coins, FunnelPlus, LayoutDashboard, List, Wallet} from "lucide-react";
+import {Bot, Coins, FunnelPlus, LayoutDashboard, List, PiggyBank, Wallet} from "lucide-react";
 
 export const assets = {
     logo,
@@ -42,6 +42,12 @@ export const SIDE_BAR_DATA = [
     },
     {
         id: "06",
+        label: "Money Plan",
+        icon: PiggyBank,
+        path: "/money-plan",
+    },
+    {
+        id: "07",
         label: "AI Advisor",
         icon: Bot,
         path: "/ai-advisor",
