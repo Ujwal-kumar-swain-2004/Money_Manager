@@ -11,22 +11,22 @@ const Modal = ({ isOpen, onClose, children, title }) => {
         >
             <div className="relative p-4 w-full max-w-2xl max-h-[90vh]">
              
-                <div className="relative bg-white rounded-xl shadow-2xl border border-gray-100">
+                <div className="relative rounded-lg border border-white/10 bg-[#0d1711] text-white shadow-2xl">
                    
-                    <div className="flex items-center justify-between p-5 md:p-6 border-b border-gray-100 rounded-t-xl">
-                        <h3 className="text-xl font-semibold text-gray-800">
+                    <div className="flex items-center justify-between border-b border-white/10 p-5 md:p-6">
+                        <h3 className="text-xl font-semibold text-white">
                             {title}
                         </h3>
 
                         <button
                             type="button"
-                            className="text-gray-500 bg-gray-50 hover:bg-gray-100 hover:text-gray-700 rounded-lg text-sm w-9 h-9 flex justify-center items-center transition-colors duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                            className="icon-btn"
                             onClick={onClose}
                         >
                             <X className="w-4 h-4" />
                         </button>
                     </div>
-                    <div className="p-5 md:p-6 text-gray-700">
+                    <div className="p-5 md:p-6 text-white/75">
                         {children}
                     </div>
                 </div>

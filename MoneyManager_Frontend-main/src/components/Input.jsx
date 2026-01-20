@@ -15,7 +15,7 @@ const Input = ({label, value, onChange, placeholder, type, isSelect, options}) =
             <div className="relative">
                 {isSelect ? (
                     <select
-                        className="w-full bg-transparent outline-none border border-gray-300 rounded-md py-2 px-3 text-gray-700 leading focus:outline-none focus:border-blue-500"
+                        className="w-full bg-black/30 outline-none border border-white/10 rounded-md py-2 px-3 text-white leading focus:outline-none focus:border-[#d9ff72]/70"
                         value={value}
                         onChange={(e) => onChange(e)}
                     >
@@ -27,7 +27,7 @@ const Input = ({label, value, onChange, placeholder, type, isSelect, options}) =
                     </select>
                 ): (
                     <input
-                        className="w-full bg-transparent outline-none border border-gray-300 rounded-md py-2 px-3 pr-10 text-gray-700 leading-tight focus:outline-none focus:border-blue-500"
+                        className="w-full bg-black/30 outline-none border border-white/10 rounded-md py-2 px-3 pr-10 text-white leading-tight focus:outline-none focus:border-[#d9ff72]/70 placeholder:text-white/35"
                         type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
                         placeholder={placeholder}
                         value={value}

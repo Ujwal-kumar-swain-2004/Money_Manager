@@ -6,7 +6,7 @@ import {AppContext} from "../context/AppContext.jsx";
 const Dashboard = ({children, activeMenu}) => {
     const {user} = useContext(AppContext);
     return (
-        <div>
+        <div className="min-h-screen bg-[#070c09]">
             <Menubar activeMenu={activeMenu} />
 
             {user && (
@@ -15,7 +15,7 @@ const Dashboard = ({children, activeMenu}) => {
                         <Sidebar activeMenu={activeMenu}/>
                     </div>
 
-                    <div className="grow mx-5">{children}</div>
+                    <main className="grow px-4 py-5 md:px-6">{children}</main>
                 </div>
             )}
         </div>
