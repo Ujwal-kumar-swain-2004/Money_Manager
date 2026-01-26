@@ -4,7 +4,7 @@ import ProductShowcase from "../components/ProductShowcase.jsx";
 
 const LandingPage = () => {
     return (
-        <div className="bg-white font-sans text-gray-800">
+        <div className="bg-[#070c09] font-sans text-white">
             <Header />
             <main>
                 <HeroSection/>

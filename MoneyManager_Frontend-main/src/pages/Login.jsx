@@ -6,7 +6,7 @@ import {validateEmail} from "../util/validation.js";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import {AppContext} from "../context/AppContext.jsx";
-import {LoaderCircle} from "lucide-react";
+import {BadgeIndianRupee, LoaderCircle, ShieldCheck, Sparkles} from "lucide-react";
 import Header from "../components/Header.jsx";
 
 const Login = () => {
@@ -60,20 +60,25 @@ const Login = () => {
     }
 
     return (
-        <div className="h-screen w-full flex flex-col">
+        <div className="min-h-screen w-full bg-[#070c09]">
             <Header />
-            <div className="flex-grow w-full relative flex items-center justify-center overflow-hidden">
-                
-                <img src={assets.login_bg} alt="Background" className="absolute inset-0 w-full h-full object-cover filter blur-sm" />
-
-                <div className="relative z-10 w-full max-w-md px-6">
-
-                    <div className="bg-white bg-opacity-95 backdrop-blur-sm rounded-lg shadow-2xl p-8">
-                        <h3 className="text-2xl font-semibold text-black text-center mb-2">
+            <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[0.95fr_1.05fr]">
+                <div className="hidden rounded-lg bg-[#101914] p-8 text-white lg:block">
+                    <p className="text-sm font-semibold uppercase text-[#d9ff72]">Welcome back</p>
+                    <h1 className="mt-3 text-4xl font-semibold">Pick up exactly where your money left off.</h1>
+                    <div className="mt-10 grid gap-3">
+                        <AuthStat icon={BadgeIndianRupee} title="Cashflow" text="Review income, expense, and balance instantly." />
+                        <AuthStat icon={ShieldCheck} title="Private workspace" text="Your data stays in your account behind token auth." />
+                        <AuthStat icon={Sparkles} title="Smart insights" text="Ask the AI advisor about your real spending." />
+                    </div>
+                </div>
+                <div className="flex items-center justify-center">
+                    <div className="panel w-full max-w-md p-8">
+                        <h3 className="text-2xl font-semibold text-white text-center mb-2">
                             Welcome Back
                         </h3>
-                        <p className="text-sm text-slate-700 text-center mb-8">
-                            Please enter your details to login in
+                        <p className="text-sm text-white/45 text-center mb-8">
+                            Sign in to manage budgets, transactions, and savings goals.
                         </p>
 
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -111,7 +116,7 @@ const Login = () => {
 
                             <p className="text-sm text-slate-800 text-center mt-6">
                                 Don't have an account?
-                                <Link to="/signup" className="font-medium text-primary underline hover:text-primary-dark transition-colors">Signup</Link>
+                                <Link to="/signup" className="ml-1 font-semibold text-[#31572c] underline">Signup</Link>
                             </p>
                         </form>
                     </div>
@@ -120,5 +125,13 @@ const Login = () => {
         </div>
     )
 }
+
+const AuthStat = ({icon: Icon, title, text}) => (
+    <div className="rounded-lg border border-white/10 bg-white/10 p-4">
+        <Icon className="text-[#d9ff72]" size={20} />
+        <p className="mt-3 font-semibold">{title}</p>
+        <p className="mt-1 text-sm text-white/60">{text}</p>
+    </div>
+);
 
 export default Login;
