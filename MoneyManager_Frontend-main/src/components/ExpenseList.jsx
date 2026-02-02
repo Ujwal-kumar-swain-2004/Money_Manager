@@ -1,12 +1,13 @@
 import moment from "moment";
 import {Download, Mail} from "lucide-react";
 import TransactionInfoCard from "./TransactionInfoCard.jsx";
+import EmptyState from "./EmptyState.jsx";
 
 const ExpenseList = ({ transactions, onDelete, onDownload, onEmail }) => {
     return (
-        <div className="card">
+        <div className="panel p-5">
             <div className="flex items-center justify-between">
-                <h5 className="text-lg">All Expanses</h5>
+                <h5 className="section-title">All Expenses</h5>
                 <div className="flex items-center justify-end gap-2">
                     <button className="card-btn" onClick={onEmail}>
                         <Mail size={15} className="text-base" /> Email
@@ -17,7 +18,7 @@ const ExpenseList = ({ transactions, onDelete, onDownload, onEmail }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                 {transactions?.map((expense) => (
                     <TransactionInfoCard
                         key={expense.id}
@@ -30,6 +31,7 @@ const ExpenseList = ({ transactions, onDelete, onDownload, onEmail }) => {
                     />
                 ))}
             </div>
+            {transactions?.length === 0 && <EmptyState title="No expenses recorded" description="Start adding daily spending to unlock insights and budget tracking." />}
         </div>
     );
 };

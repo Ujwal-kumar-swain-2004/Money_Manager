@@ -10,6 +10,8 @@ import ExpenseList from "../components/ExpenseList.jsx";
 import Modal from "../components/Modal.jsx";
 import AddExpenseForm from "../components/AddExpenseForm.jsx";
 import DeleteAlert from "../components/DeleteAlert.jsx";
+import PageHeader from "../components/PageHeader.jsx";
+import {Plus} from "lucide-react";
 
 const Expense = () => {
     useUser();
@@ -59,7 +61,7 @@ const Expense = () => {
     };
 
     const handleAddExpense = async (expense) => {
-        const { name, categoryId, amount, date, icon } = expense; 
+        const { name, categoryId, amount, date, icon, paymentMethod, notes, tags, receiptUrl } = expense; 
 
         if (!name.trim()) {
             toast.error("Name is required.");
@@ -94,6 +96,10 @@ const Expense = () => {
                 amount: Number(amount), 
                 date,
                 icon,
+                paymentMethod,
+                notes,
+                tags,
+                receiptUrl,
             });
 
             setOpenAddExpenseModal(false);
@@ -171,7 +177,13 @@ const Expense = () => {
 
     return (
         <Dashboard activeMenu="Expense">
-            <div className="my-5 mx-auto">
+            <div className="mx-auto max-w-7xl">
+                <PageHeader
+                    eyebrow="Cash out"
+                    title="Expenses"
+                    description="Record spending with payment method, notes, tags, and receipts so your money story stays searchable."
+                    action={<button onClick={() => setOpenAddExpenseModal(true)} className="add-btn"><Plus size={16} /> Add Expense</button>}
+                />
                 <div className="grid grid-cols-1 gap-6">
                     <div className="">
                         <ExpenseOverview

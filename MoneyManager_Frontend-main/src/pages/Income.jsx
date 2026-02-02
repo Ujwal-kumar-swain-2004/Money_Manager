@@ -11,6 +11,7 @@ import {Plus} from "lucide-react";
 import AddIncomeForm from "../components/AddIncomeForm.jsx";
 import DeleteAlert from "../components/DeleteAlert.jsx";
 import IncomeOverview from "../components/IncomeOverview.jsx";
+import PageHeader from "../components/PageHeader.jsx";
 
 const Income = () => {
     useUser();
@@ -55,7 +56,7 @@ const Income = () => {
     }
 
     const handleAddIncome = async (income) => {
-        const {name, amount, date, icon, categoryId} = income;
+        const {name, amount, date, icon, categoryId, paymentMethod, notes, tags, receiptUrl} = income;
 
         if (!name.trim()) {
             toast.error("Please enter a name");
@@ -90,6 +91,10 @@ const Income = () => {
                 date,
                 icon,
                 categoryId,
+                paymentMethod,
+                notes,
+                tags,
+                receiptUrl,
             })
             if (response.status === 201) {
                 setOpenAddIncomeModal(false);
@@ -154,7 +159,13 @@ const Income = () => {
 
     return (
         <Dashboard activeMenu="Income">
-            <div className="my-5 mx-auto">
+            <div className="mx-auto max-w-7xl">
+                <PageHeader
+                    eyebrow="Cash in"
+                    title="Income"
+                    description="Track salary, freelance work, refunds, bonuses, and every source that grows your balance."
+                    action={<button onClick={() => setOpenAddIncomeModal(true)} className="add-btn"><Plus size={16} /> Add Income</button>}
+                />
                 <div className="grid grid-cols-1 gap-6">
                     <div>
                         {/* overview for income with line char */}

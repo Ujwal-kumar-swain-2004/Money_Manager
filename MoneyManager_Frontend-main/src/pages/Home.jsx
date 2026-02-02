@@ -12,6 +12,7 @@ import RecentTransactions from "../components/RecentTransactions.jsx";
 import FinanceOverview from "../components/FinanceOverview.jsx";
 import Transactions from "../components/Transactions.jsx";
 import AiInsightsCard from "../components/AiInsightsCard.jsx";
+import PageHeader from "../components/PageHeader.jsx";
 
 const Home = () => {
     useUser();
@@ -46,26 +47,31 @@ const Home = () => {
     return (
         <div>
             <Dashboard activeMenu="Dashboard">
-                <div className="my-5 mx-auto">
+                <div className="mx-auto max-w-7xl">
+                    <PageHeader
+                        eyebrow="Overview"
+                        title="Financial command center"
+                        description="Track cashflow, review recent movement, and jump into the money decisions that matter today."
+                    />
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         {/* Display the cards*/}
                         <InfoCard
                             icon={<WalletCards />}
                             label="Total Balance"
                             value={addThousandsSeparator(dashboardData?.totalBalance || 0)}
-                            color="bg-purple-800"
+                            color="bg-[#31572c]"
                         />
                         <InfoCard
                             icon={<Wallet />}
                             label="Total Income"
                             value={addThousandsSeparator(dashboardData?.totalIncome || 0)}
-                            color="bg-green-800"
+                            color="bg-emerald-700"
                         />
                         <InfoCard
                             icon={<Coins />}
                             label="Total Expense"
                             value={addThousandsSeparator(dashboardData?.totalExpense || 0)}
-                            color="bg-red-800"
+                            color="bg-rose-700"
                         />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">

@@ -13,10 +13,10 @@ const IncomeOverview = ({transactions, onAddIncome}) => {
         return () => {};
     }, [transactions]);
     return (
-        <div className="card">
+        <div className="panel p-5">
             <div className="flex items-center justify-between">
                 <div>
-                    <h5 className="text-lg">
+                    <h5 className="section-title">
                         Income Overview
                     </h5>
                     <p className="text-xs text-gray-400 mt-0 5">
@@ -27,7 +27,7 @@ const IncomeOverview = ({transactions, onAddIncome}) => {
                     <Plus size={15} className="text-lg" /> Add Income
                 </button>
             </div>
-            <div className="mt-10">
+            <div className="mt-6">
                 <CustomLineChart data={chartData} />
             </div>
         </div>

@@ -2,6 +2,7 @@ import {Download, LoaderCircle, Mail} from "lucide-react";
 import TransactionInfoCard from "./TransactionInfoCard.jsx";
 import moment from "moment";
 import {useState} from "react";
+import EmptyState from "./EmptyState.jsx";
 
 const IncomeList = ({transactions, onDelete, onDownload, onEmail}) => {
     const [loading, setLoading] = useState(false);
@@ -22,9 +23,9 @@ const IncomeList = ({transactions, onDelete, onDownload, onEmail}) => {
         }
     }
     return (
-        <div className="card">
+        <div className="panel p-5">
             <div className="flex items-center justify-between">
-                <h5 className="text-lg">Income Sources</h5>
+                <h5 className="section-title">Income Sources</h5>
                 <div className="flex items-center justify-end gap-2">
                     <button disabled={loading} className="card-btn" onClick={handleEmail}>
                         {loading ? (
@@ -56,7 +57,7 @@ const IncomeList = ({transactions, onDelete, onDownload, onEmail}) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
                 {/* display the incomes */}
                 {transactions?.map((income) => (
                     <TransactionInfoCard
@@ -70,6 +71,7 @@ const IncomeList = ({transactions, onDelete, onDownload, onEmail}) => {
                     />
                 ))}
             </div>
+            {transactions?.length === 0 && <EmptyState title="No income recorded" description="Add salary, freelance, refunds, or any source of money coming in." />}
         </div>
     )
 }

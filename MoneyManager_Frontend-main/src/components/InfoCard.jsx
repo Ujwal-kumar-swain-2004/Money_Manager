@@ -1,12 +1,12 @@
 const InfoCard = ({icon, label, value, color}) => {
     return(
-        <div className="flex gap-6 bg-white p-6 rounded-2xl shadow-md shadow-gray-100 border border-gray-200/50">
-            <div className={`w-14 h-14 flex items-center justify-center text-[26px] text-white ${color} rounded-full drop-shadow-xl`}>
+        <div className="panel flex items-center gap-4 p-5">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-md text-[24px] text-white ${color}`}>
                 {icon}
             </div>
             <div>
-                <h6 className="text-sm text-gray-500 mb-1">{label}</h6>
-                <span className="text-[22px]">&#8377;{value}</span>
+                <h6 className="text-xs font-semibold uppercase text-white/45">{label}</h6>
+                <span className="mt-1 block text-2xl font-semibold text-white">&#8377;{value}</span>
             </div>
         </div>
     )
