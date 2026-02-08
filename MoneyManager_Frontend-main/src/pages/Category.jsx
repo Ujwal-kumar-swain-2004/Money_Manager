@@ -8,6 +8,7 @@ import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import toast from "react-hot-toast";
 import Modal from "../components/Modal.jsx";
 import AddCategoryForm from "../components/AddCategoryForm.jsx";
+import PageHeader from "../components/PageHeader.jsx";
 
 const Category = () => {
     useUser();
@@ -126,20 +127,21 @@ const Category = () => {
 
     return (
         <Dashboard activeMenu="Category">
-            <div className="my-5 mx-auto">
-                
-                <div className="flex justify-between items-center mb-5">
-                    <h2 className="text-2xl font-semibold">All Categories</h2>
-                    <button
-                        onClick={() => setOpenAddCategoryModal(true)}
-                        className="add-btn flex items-center gap-1">
-                        <Plus size={15} />
-                        Add Category
-                    </button>
-                </div>
+            <div className="mx-auto max-w-7xl">
+                <PageHeader
+                    eyebrow="Organize"
+                    title="Categories"
+                    description="Create a clean structure for income and expenses so reports, budgets, and AI insights stay useful."
+                    action={(
+                        <button onClick={() => setOpenAddCategoryModal(true)} className="add-btn">
+                            <Plus size={15} />
+                            Add Category
+                        </button>
+                    )}
+                />
 
                 {loading ? (
-                    <div className="text-center">Loading categories...</div>
+                    <div className="panel p-6 text-center text-sm text-gray-500">Loading categories...</div>
                 ) : (
                     <CategoryList categories={categoryData} onEditCategory={handleEditCategory} />
                 )}
