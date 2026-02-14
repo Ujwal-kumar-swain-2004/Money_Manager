@@ -6,34 +6,34 @@ import { TrendingUp, TrendingDown, Info, Loader2 } from "lucide-react";
 const typeConfig = {
     positive: {
         border: "border-l-green-500",
-        bg: "bg-green-50",
+        bg: "bg-emerald-500/10",
         icon: TrendingUp,
-        iconColor: "text-green-600",
-        badge: "bg-green-100 text-green-700",
+        iconColor: "text-emerald-300",
+        badge: "bg-emerald-400/15 text-emerald-200",
     },
     warning: {
         border: "border-l-amber-500",
-        bg: "bg-amber-50",
+        bg: "bg-amber-500/10",
         icon: TrendingDown,
-        iconColor: "text-amber-600",
-        badge: "bg-amber-100 text-amber-700",
+        iconColor: "text-amber-300",
+        badge: "bg-amber-400/15 text-amber-200",
     },
     neutral: {
         border: "border-l-blue-500",
-        bg: "bg-blue-50",
+        bg: "bg-sky-500/10",
         icon: Info,
-        iconColor: "text-blue-600",
-        badge: "bg-blue-100 text-blue-700",
+        iconColor: "text-sky-300",
+        badge: "bg-sky-400/15 text-sky-200",
     },
 };
 
 const SkeletonCard = () => (
-    <div className="animate-pulse flex gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
-        <div className="w-9 h-9 bg-gray-200 rounded-full flex-shrink-0" />
+    <div className="animate-pulse flex gap-4 p-4 bg-white/[0.03] rounded-xl border border-white/10">
+        <div className="w-9 h-9 bg-white/10 rounded-full flex-shrink-0" />
         <div className="flex-1 space-y-2 pt-1">
-            <div className="h-3 bg-gray-200 rounded w-1/2" />
-            <div className="h-2 bg-gray-200 rounded w-3/4" />
-            <div className="h-2 bg-gray-200 rounded w-2/3" />
+            <div className="h-3 bg-white/10 rounded w-1/2" />
+            <div className="h-2 bg-white/10 rounded w-3/4" />
+            <div className="h-2 bg-white/10 rounded w-2/3" />
         </div>
     </div>
 );
@@ -66,11 +66,11 @@ const AiInsightsCard = () => {
                     <h5 className="text-lg font-semibold flex items-center gap-2">
                         <span className="text-xl">🤖</span> AI Spending Insights
                     </h5>
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-white/45 mt-0.5">
                         Personalized analysis of your finances this month
                     </p>
                 </div>
-                <span className="text-xs font-medium px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full">
+                <span className="text-xs font-medium px-2.5 py-1 bg-[#d9ff72]/15 text-[#d9ff72] rounded-full">
                     Powered by AI
                 </span>
             </div>
@@ -83,13 +83,13 @@ const AiInsightsCard = () => {
             )}
 
             {error && (
-                <div className="text-center py-6 text-gray-400 text-sm">
+                <div className="text-center py-6 text-white/45 text-sm">
                     <p>{error}</p>
                 </div>
             )}
 
             {!loading && !error && insights.length === 0 && (
-                <p className="text-sm text-gray-400 text-center py-4">
+                <p className="text-sm text-white/45 text-center py-4">
                     Add some income and expenses to get AI insights!
                 </p>
             )}
@@ -102,14 +102,14 @@ const AiInsightsCard = () => {
                         return (
                             <div
                                 key={index}
-                                className={`flex gap-3 p-4 rounded-xl border-l-4 ${config.border} ${config.bg} transition-all hover:shadow-sm`}
+                                className={`flex gap-3 p-4 rounded-xl border border-white/10 border-l-4 ${config.border} ${config.bg} transition-all hover:bg-white/[0.06]`}
                             >
-                                <div className={`w-9 h-9 flex items-center justify-center rounded-full bg-white flex-shrink-0 ${config.iconColor}`}>
+                                <div className={`w-9 h-9 flex items-center justify-center rounded-full bg-white/10 flex-shrink-0 ${config.iconColor}`}>
                                     <Icon size={17} />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-start justify-between gap-2">
-                                        <p className="text-sm font-semibold text-gray-800 leading-snug">
+                                        <p className="text-sm font-semibold text-white leading-snug">
                                             {insight.title}
                                         </p>
                                         {insight.amount != null && (
@@ -118,7 +118,7 @@ const AiInsightsCard = () => {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-gray-500 mt-1 leading-relaxed">
+                                    <p className="text-xs text-white/45 mt-1 leading-relaxed">
                                         {insight.description}
                                     </p>
                                 </div>
