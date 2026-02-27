@@ -2,12 +2,16 @@ import { useState, useEffect } from "react";
 import EmojiPickerPopup from "./EmojiPickerPopup.jsx";
 import Input from "./Input.jsx";
 const AddExpenseForm = ({ onAddExpense, categories }) => {
-    const [expense, setExpense] = useState({ // Renamed 'income' state to 'expense' for clarity
-        name,
-        categoryId: "", // Changed from 'category' to 'categoryId'
+    const [expense, setExpense] = useState({
+        name: "",
+        categoryId: "",
         amount: "",
         date: "",
-        icon: "", // Icon might be associated with the selected category, or kept separate for custom entries
+        icon: "",
+        paymentMethod: "UPI",
+        notes: "",
+        tags: "",
+        receiptUrl: "",
     });
     useEffect(() => {
         if (categories && categories.length > 0 && !expense.categoryId) {
@@ -58,6 +62,42 @@ const AddExpenseForm = ({ onAddExpense, categories }) => {
                 label="Date"
                 placeholder=""
                 type="date"
+            />
+
+            <Input
+                label="Payment Method"
+                value={expense.paymentMethod}
+                onChange={({ target }) => handleChange("paymentMethod", target.value)}
+                isSelect={true}
+                options={[
+                    {value: "cash", label: "Cash"},
+                    {value: "UPI", label: "UPI"},
+                    {value: "card", label: "Card"},
+                    {value: "bank", label: "Bank"},
+                ]}
+            />
+
+            <Input
+                value={expense.tags}
+                onChange={({ target }) => handleChange("tags", target.value)}
+                label="Tags"
+                placeholder="e.g., monthly, family"
+                type="text"
+            />
+
+            <Input
+                value={expense.receiptUrl}
+                onChange={({ target }) => handleChange("receiptUrl", target.value)}
+                label="Receipt URL"
+                placeholder="Paste receipt link"
+                type="text"
+            />
+
+            <textarea
+                value={expense.notes}
+                onChange={({ target }) => handleChange("notes", target.value)}
+                className="input-box min-h-24"
+                placeholder="Notes"
             />
 
             <div className="flex justify-end mt-6">

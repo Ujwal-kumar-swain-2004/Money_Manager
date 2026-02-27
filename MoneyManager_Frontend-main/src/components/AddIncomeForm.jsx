@@ -9,7 +9,11 @@ const AddIncomeForm = ({onAddIncome, categories}) => {
         amount: '',
         date: '',
         icon: '',
-        categoryId: ''
+        categoryId: '',
+        paymentMethod: 'bank',
+        notes: '',
+        tags: '',
+        receiptUrl: '',
     })
     const [loading, setLoading] = useState(false);
 
@@ -74,6 +78,42 @@ const AddIncomeForm = ({onAddIncome, categories}) => {
                 label="Date"
                 placeholder=""
                 type="date"
+            />
+
+            <Input
+                label="Payment Method"
+                value={income.paymentMethod}
+                onChange={({target}) => handleChange('paymentMethod', target.value)}
+                isSelect={true}
+                options={[
+                    {value: "cash", label: "Cash"},
+                    {value: "UPI", label: "UPI"},
+                    {value: "card", label: "Card"},
+                    {value: "bank", label: "Bank"},
+                ]}
+            />
+
+            <Input
+                value={income.tags}
+                onChange={({target}) => handleChange('tags', target.value)}
+                label="Tags"
+                placeholder="e.g., salary, side-hustle"
+                type="text"
+            />
+
+            <Input
+                value={income.receiptUrl}
+                onChange={({target}) => handleChange('receiptUrl', target.value)}
+                label="Receipt URL"
+                placeholder="Paste receipt link"
+                type="text"
+            />
+
+            <textarea
+                value={income.notes}
+                onChange={({target}) => handleChange('notes', target.value)}
+                className="input-box min-h-24"
+                placeholder="Notes"
             />
 
             <div className="flex justify-end mt-6">
