@@ -42,14 +42,18 @@ const AiAdvisor = () => {
         try {
             const response = await axiosConfig.get(API_ENDPOINTS.AI_ADVICE, {
                 params: {question: q},
+                timeout: 60000,
             });
             setMessages((prev) => [...prev, {role: "assistant", text: response.data.answer}]);
         } catch (err) {
-            console.error("AI advice error:", err);
-            toast.error("Could not get a response. Please try again.");
+            console.error("AI advice error:", err.response?.data || err.message);
+            const timedOut = err.code === "ECONNABORTED";
+            toast.error(timedOut ? "AI is taking longer than usual. Please try again." : "Could not get a response. Please try again.");
             setMessages((prev) => [...prev, {
                 role: "assistant",
-                text: "Sorry, I could not process that right now. Please try again in a moment.",
+                text: timedOut
+                    ? "The AI request took too long this time. I have increased the wait time, so try again in a moment."
+                    : "Sorry, I could not process that right now. Please try again in a moment.",
             }]);
         } finally {
             setLoading(false);
@@ -67,8 +71,8 @@ const AiAdvisor = () => {
     return (
         <Dashboard activeMenu="AI Advisor">
             <div className="mx-auto flex max-w-7xl flex-col gap-4" style={{height: "calc(100vh - 110px)"}}>
-                <div className="flex items-center gap-4 rounded-lg bg-[#101914] p-5 text-white">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#d9ff72] text-[#101914]">
+                <div className="flex items-center gap-4 rounded-lg bg-[#1f2a24] p-5 text-white">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-md bg-[#d9ff72] text-[#1f2a24]">
                         <Bot size={24} />
                     </div>
                     <div>
@@ -79,7 +83,7 @@ const AiAdvisor = () => {
                                 Powered by AI
                             </span>
                         </h2>
-                        <p className="mt-0.5 text-sm text-white/60">Ask anything about your finances using your real app data.</p>
+                        <p className="mt-0.5 text-sm text-white/72">Ask anything about your finances using your real app data.</p>
                     </div>
                 </div>
 
@@ -88,9 +92,9 @@ const AiAdvisor = () => {
                         {messages.map((msg, index) => (
                             <div key={index} className={`mb-4 flex items-end gap-3 ${msg.role === "user" ? "flex-row-reverse" : ""}`}>
                                 <div className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md ${msg.role === "assistant" ? "bg-[#31572c]" : "bg-white/10"}`}>
-                                    {msg.role === "assistant" ? <Bot size={16} className="text-white" /> : <User size={16} className="text-white/70" />}
+                                    {msg.role === "assistant" ? <Bot size={16} className="text-white" /> : <User size={16} className="text-white/78" />}
                                 </div>
-                                <div className={`max-w-[75%] rounded-lg px-4 py-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${msg.role === "assistant" ? "border border-white/10 bg-white/[0.04] text-white/80" : "bg-[#101914] text-white"}`}>
+                                <div className={`max-w-[75%] rounded-lg px-4 py-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap ${msg.role === "assistant" ? "border border-white/14 bg-white/[0.04] text-white/80" : "bg-[#1f2a24] text-white"}`}>
                                     {msg.text}
                                 </div>
                             </div>
@@ -102,7 +106,7 @@ const AiAdvisor = () => {
 
                     {messages.length === 1 && !loading && (
                         <div className="px-6 pb-3">
-                            <p className="mb-2 text-xs font-semibold uppercase text-white/45">Suggested questions</p>
+                            <p className="mb-2 text-xs font-semibold uppercase text-white/65">Suggested questions</p>
                             <div className="flex flex-wrap gap-2">
                                 {SUGGESTED_QUESTIONS.map((question) => (
                                     <button
@@ -117,7 +121,7 @@ const AiAdvisor = () => {
                         </div>
                     )}
 
-                    <div className="flex items-end gap-3 border-t border-white/10 bg-black/20 p-4">
+                    <div className="flex items-end gap-3 border-t border-white/14 bg-black/15 p-4">
                         <textarea
                             ref={inputRef}
                             value={input}
@@ -125,7 +129,7 @@ const AiAdvisor = () => {
                             onKeyDown={handleKeyDown}
                             placeholder="Ask about your finances... Enter to send"
                             rows={1}
-                            className="flex-1 resize-none rounded-md border border-white/10 bg-black/30 px-4 py-2.5 text-sm text-white outline-none transition-all placeholder:text-white/35 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10"
+                            className="flex-1 resize-none rounded-md border border-white/14 bg-black/15 px-4 py-2.5 text-sm text-white outline-none transition-all placeholder:text-white/78 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10"
                             style={{maxHeight: "120px"}}
                             disabled={loading}
                         />
@@ -134,8 +138,8 @@ const AiAdvisor = () => {
                             disabled={!input.trim() || loading}
                             className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-md transition-all ${
                                 input.trim() && !loading
-                                    ? "cursor-pointer bg-[#d9ff72] text-[#101914] hover:bg-[#c9f35b]"
-                                    : "cursor-not-allowed bg-white/10 text-white/35"
+                                    ? "cursor-pointer bg-[#d9ff72] text-[#1f2a24] hover:bg-[#c9f35b]"
+                                    : "cursor-not-allowed bg-white/10 text-white/78"
                             }`}
                         >
                             {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
@@ -152,7 +156,7 @@ const TypingIndicator = () => (
         <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-[#31572c]">
             <Bot size={16} className="text-white" />
         </div>
-        <div className="rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 shadow-sm">
+        <div className="rounded-lg border border-white/14 bg-white/[0.04] px-4 py-3 shadow-sm">
             <div className="flex h-4 items-center gap-1">
                 <span className="h-2 w-2 animate-bounce rounded-full bg-[#31572c]" style={{animationDelay: "0ms"}} />
                 <span className="h-2 w-2 animate-bounce rounded-full bg-[#31572c]" style={{animationDelay: "150ms"}} />
@@ -163,3 +167,4 @@ const TypingIndicator = () => (
 );
 
 export default AiAdvisor;
+

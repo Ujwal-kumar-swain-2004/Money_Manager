@@ -13,6 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
 import java.time.format.TextStyle;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -40,6 +41,7 @@ public class AiService {
                                                 You ONLY answer questions about personal finance, budgeting, saving, and spending analysis.
                                                 Always refer to money amounts in Indian Rupees (₹).
                                                 Be concise, warm, and specific. Use numbers from the provided data.
+                                                Keep normal chat answers under 180 words unless the user asks for a detailed plan.
                                                 If asked about anything unrelated to finance, politely redirect to financial topics.
                                                 """)
                                 .build();
@@ -53,26 +55,32 @@ public class AiService {
                 ProfileEntity profile = profileService.getCurrentProfile();
                 String context = buildFinancialContext(profile);
 
-                return chatClient.prompt()
+                try {
+                        return chatClient.prompt()
                                 .user(u -> u.text("""
                                                 Here is the financial data for the user:
                                                 {context}
 
                                                 User's question: {question}
 
-                                                Please answer based on the above data.
+                                                Please answer based on the above data. Keep the answer practical and short.
                                                 """)
                                                 .param("context", context)
                                                 .param("question", userQuestion))
                                 .call()
                                 .content();
+                } catch (Exception ex) {
+                        log.warn("AI advice unavailable, using local fallback: {}", ex.getMessage());
+                        return buildFallbackAdvice(userQuestion);
+                }
         }
 
         public List<FinancialInsightsResponse.FinancialInsight> getSpendingInsights() {
                 ProfileEntity profile = profileService.getCurrentProfile();
                 String context = buildFinancialContext(profile);
 
-                FinancialInsightsResponse response = chatClient.prompt()
+                try {
+                        FinancialInsightsResponse response = chatClient.prompt()
                                 .user(u -> u.text(
                                                 """
                                                                 Analyze the following financial data and provide 3 to 5 actionable insights.
@@ -92,10 +100,94 @@ public class AiService {
                                 .call()
                                 .entity(FinancialInsightsResponse.class);
 
-                if (response == null || response.getInsights() == null) {
-                        return List.of();
+                        if (response == null || response.getInsights() == null) {
+                                return buildFallbackInsights();
+                        }
+                        return response.getInsights();
+                } catch (Exception ex) {
+                        log.warn("AI insights unavailable, using local fallback: {}", ex.getMessage());
+                        return buildFallbackInsights();
                 }
-                return response.getInsights();
+        }
+
+        private String buildFallbackAdvice(String userQuestion) {
+                List<IncomeDTO> incomes = incomeService.getCurrentMonthIncomesForCurrentUser();
+                List<ExpenseDTO> expenses = expenseService.getCurrentMonthExpensesForCurrentUser();
+                BigDecimal totalIncome = totalIncome(incomes);
+                BigDecimal totalExpense = totalExpense(expenses);
+                BigDecimal savings = totalIncome.subtract(totalExpense);
+                Map<String, BigDecimal> expenseByCategory = expenseByCategory(expenses);
+                String topCategory = topCategory(expenseByCategory);
+                BigDecimal topAmount = expenseByCategory.getOrDefault(topCategory, BigDecimal.ZERO);
+
+                String lowerQuestion = userQuestion == null ? "" : userQuestion.toLowerCase(Locale.ROOT);
+                if (lowerQuestion.contains("reduce") || lowerQuestion.contains("save") || lowerQuestion.contains("spending")) {
+                        return String.format("""
+                                        AI quota is unavailable right now, so here is a quick local analysis from your data.
+
+                                        This month you earned ₹%s and spent ₹%s, leaving ₹%s. Your biggest spend area is %s at ₹%s. Start by setting a 10%% cut target there, which can save around ₹%s. Also review smaller flexible spends like food, shopping, travel, and subscriptions before touching fixed bills.
+                                        """,
+                                        totalIncome, totalExpense, savings, topCategory, topAmount,
+                                        topAmount.multiply(new BigDecimal("0.10")).setScale(0, java.math.RoundingMode.HALF_UP));
+                }
+
+                return String.format("""
+                                AI quota is unavailable right now, so here is a quick local summary.
+
+                                This month: income ₹%s, expenses ₹%s, net balance ₹%s. Your top expense category is %s at ₹%s. Keep fixed bills planned, and focus on reducing flexible categories first.
+                                """,
+                                totalIncome, totalExpense, savings, topCategory, topAmount);
+        }
+
+        private List<FinancialInsightsResponse.FinancialInsight> buildFallbackInsights() {
+                List<IncomeDTO> incomes = incomeService.getCurrentMonthIncomesForCurrentUser();
+                List<ExpenseDTO> expenses = expenseService.getCurrentMonthExpensesForCurrentUser();
+                BigDecimal income = totalIncome(incomes);
+                BigDecimal expense = totalExpense(expenses);
+                BigDecimal balance = income.subtract(expense);
+                Map<String, BigDecimal> byCategory = expenseByCategory(expenses);
+                String topCategory = topCategory(byCategory);
+                BigDecimal topAmount = byCategory.getOrDefault(topCategory, BigDecimal.ZERO);
+
+                return List.of(
+                                new FinancialInsightsResponse.FinancialInsight(
+                                                balance.compareTo(BigDecimal.ZERO) >= 0 ? "Positive balance" : "Balance needs attention",
+                                                String.format("Income is ₹%s and expenses are ₹%s, leaving ₹%s this month.", income, expense, balance),
+                                                balance.compareTo(BigDecimal.ZERO) >= 0 ? "positive" : "warning",
+                                                balance.doubleValue()),
+                                new FinancialInsightsResponse.FinancialInsight(
+                                                "Top spend category",
+                                                String.format("%s is your biggest expense area this month at ₹%s.", topCategory, topAmount),
+                                                "warning",
+                                                topAmount.doubleValue()),
+                                new FinancialInsightsResponse.FinancialInsight(
+                                                "Savings opportunity",
+                                                String.format("A 10%% cut in %s can save around ₹%s this month.", topCategory,
+                                                                topAmount.multiply(new BigDecimal("0.10")).setScale(0, java.math.RoundingMode.HALF_UP)),
+                                                "neutral",
+                                                topAmount.multiply(new BigDecimal("0.10")).doubleValue()));
+        }
+
+        private BigDecimal totalIncome(List<IncomeDTO> incomes) {
+                return incomes.stream().map(IncomeDTO::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        private BigDecimal totalExpense(List<ExpenseDTO> expenses) {
+                return expenses.stream().map(ExpenseDTO::getAmount).reduce(BigDecimal.ZERO, BigDecimal::add);
+        }
+
+        private Map<String, BigDecimal> expenseByCategory(List<ExpenseDTO> expenses) {
+                return expenses.stream()
+                                .collect(Collectors.groupingBy(
+                                                e -> e.getCategoryName() != null ? e.getCategoryName() : "Uncategorized",
+                                                Collectors.reducing(BigDecimal.ZERO, ExpenseDTO::getAmount, BigDecimal::add)));
+        }
+
+        private String topCategory(Map<String, BigDecimal> byCategory) {
+                return byCategory.entrySet().stream()
+                                .max(Comparator.comparing(Map.Entry::getValue))
+                                .map(Map.Entry::getKey)
+                                .orElse("No expenses yet");
         }
 
         /**
@@ -200,7 +292,7 @@ public class AiService {
 
                 if (!incomes.isEmpty()) {
                         sb.append("\n=== INCOME DETAILS ===\n");
-                        incomes.forEach(i -> sb.append("- ").append(i.getName())
+                        incomes.stream().limit(15).forEach(i -> sb.append("- ").append(i.getName())
                                         .append(" | ₹").append(i.getAmount())
                                         .append(" | ").append(i.getDate())
                                         .append(" | Category: ").append(i.getCategoryName()).append("\n"));
@@ -208,7 +300,7 @@ public class AiService {
 
                 if (!expenses.isEmpty()) {
                         sb.append("\n=== EXPENSE DETAILS ===\n");
-                        expenses.forEach(e -> sb.append("- ").append(e.getName())
+                        expenses.stream().limit(20).forEach(e -> sb.append("- ").append(e.getName())
                                         .append(" | ₹").append(e.getAmount())
                                         .append(" | ").append(e.getDate())
                                         .append(" | Category: ").append(e.getCategoryName()).append("\n"));

@@ -28,7 +28,7 @@ const typeConfig = {
 };
 
 const SkeletonCard = () => (
-    <div className="animate-pulse flex gap-4 p-4 bg-white/[0.03] rounded-xl border border-white/10">
+    <div className="animate-pulse flex gap-4 p-4 bg-white/[0.03] rounded-xl border border-white/14">
         <div className="w-9 h-9 bg-white/10 rounded-full flex-shrink-0" />
         <div className="flex-1 space-y-2 pt-1">
             <div className="h-3 bg-white/10 rounded w-1/2" />
@@ -46,10 +46,12 @@ const AiInsightsCard = () => {
     useEffect(() => {
         const fetchInsights = async () => {
             try {
-                const response = await axiosConfig.get(API_ENDPOINTS.AI_INSIGHTS);
+                const response = await axiosConfig.get(API_ENDPOINTS.AI_INSIGHTS, {
+                    timeout: 60000,
+                });
                 setInsights(response.data || []);
             } catch (err) {
-                console.error("Failed to fetch AI insights:", err);
+                console.error("Failed to fetch AI insights:", err.response?.data || err.message);
                 setError("Could not load AI insights right now.");
             } finally {
                 setLoading(false);
@@ -66,7 +68,7 @@ const AiInsightsCard = () => {
                     <h5 className="text-lg font-semibold flex items-center gap-2">
                         <span className="text-xl">🤖</span> AI Spending Insights
                     </h5>
-                    <p className="text-xs text-white/45 mt-0.5">
+                    <p className="text-xs text-white/65 mt-0.5">
                         Personalized analysis of your finances this month
                     </p>
                 </div>
@@ -83,13 +85,13 @@ const AiInsightsCard = () => {
             )}
 
             {error && (
-                <div className="text-center py-6 text-white/45 text-sm">
+                <div className="text-center py-6 text-white/65 text-sm">
                     <p>{error}</p>
                 </div>
             )}
 
             {!loading && !error && insights.length === 0 && (
-                <p className="text-sm text-white/45 text-center py-4">
+                <p className="text-sm text-white/65 text-center py-4">
                     Add some income and expenses to get AI insights!
                 </p>
             )}
@@ -102,7 +104,7 @@ const AiInsightsCard = () => {
                         return (
                             <div
                                 key={index}
-                                className={`flex gap-3 p-4 rounded-xl border border-white/10 border-l-4 ${config.border} ${config.bg} transition-all hover:bg-white/[0.06]`}
+                                className={`flex gap-3 p-4 rounded-xl border border-white/14 border-l-4 ${config.border} ${config.bg} transition-all hover:bg-white/[0.06]`}
                             >
                                 <div className={`w-9 h-9 flex items-center justify-center rounded-full bg-white/10 flex-shrink-0 ${config.iconColor}`}>
                                     <Icon size={17} />
@@ -118,7 +120,7 @@ const AiInsightsCard = () => {
                                             </span>
                                         )}
                                     </div>
-                                    <p className="text-xs text-white/45 mt-1 leading-relaxed">
+                                    <p className="text-xs text-white/65 mt-1 leading-relaxed">
                                         {insight.description}
                                     </p>
                                 </div>
@@ -132,3 +134,4 @@ const AiInsightsCard = () => {
 };
 
 export default AiInsightsCard;
+

@@ -8,7 +8,9 @@ $env:BREVO_SMTP_KEY = "placeholder_key"
 $env:BREVO_FROM_EMAIL = "noreply@moneymanager.com"
 $env:FRONTEND_URL = "http://localhost:5173"
 $env:BACKEND_URL = "http://localhost:8080"
-$env:OPENAI_API_KEY = "placeholder"
+if (-not $env:OPENAI_API_KEY) {
+    $env:OPENAI_API_KEY = [Environment]::GetEnvironmentVariable("OPENAI_API_KEY", "User")
+}
 
 Set-Location "$PSScriptRoot\Money_Manager-main\moneymanager"
 mvn spring-boot:run *> backend-run.log

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const axiosConfig = axios.create({
     baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1.0',
-    timeout: 10000,
+    timeout: 30000,
 });
 
 axiosConfig.interceptors.request.use(
@@ -33,3 +33,4 @@ axiosConfig.interceptors.response.use(
 );
 
 export default axiosConfig;
+
