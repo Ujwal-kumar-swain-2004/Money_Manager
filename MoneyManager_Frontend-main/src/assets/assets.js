@@ -1,7 +1,7 @@
 import logo from "./logo.png";
 import login_bg from "./login-bg.png";
 import landing from "./landing.png";
-import {Bot, Coins, FunnelPlus, LayoutDashboard, List, PiggyBank, UsersRound, Wallet} from "lucide-react";
+import {Bot, Coins, FunnelPlus, HandCoins, LayoutDashboard, List, PiggyBank, UsersRound, Wallet} from "lucide-react";
 
 export const assets = {
     logo,
@@ -54,8 +54,15 @@ export const SIDE_BAR_DATA = [
     },
     {
         id: "08",
+        label: "Friends",
+        icon: HandCoins,
+        path: "/friends",
+    },
+    {
+        id: "09",
         label: "AI Advisor",
         icon: Bot,
         path: "/ai-advisor",
     },
 ];
+

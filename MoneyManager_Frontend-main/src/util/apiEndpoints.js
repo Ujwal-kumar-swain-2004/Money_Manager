@@ -37,4 +37,13 @@ export const API_ENDPOINTS = {
     FAMILY_DASHBOARD: (familyId) => `/families/${familyId}/dashboard`,
     FAMILY_MEMBERS: (familyId) => `/families/${familyId}/members`,
     FAMILY_TRANSFERS: (familyId) => `/families/${familyId}/transfers`,
+    FRIENDS_DASHBOARD: "/friends/dashboard",
+    FRIENDS: "/friends",
+    FRIEND_STATUS: (friendId) => `/friends/${friendId}/status`,
+    FRIEND_GROUPS: "/friends/groups",
+    FRIEND_EXPENSES: "/friends/expenses",
+    FRIEND_SETTLEMENTS: "/friends/settlements",
+    FRIEND_REMINDERS: "/friends/reminders",
+    FRIEND_EXPENSE_COMMENTS: (expenseId) => `/friends/expenses/${expenseId}/comments`,
 }
+
