@@ -13,7 +13,7 @@ const Header = () => {
     ];
 
     return (
-        <header className="sticky top-0 z-30 border-b border-white/10 bg-[#101914] text-white">
+        <header className="sticky top-0 z-30 border-b border-white/14 bg-[#1f2a24] text-white">
             <div className="mx-auto max-w-7xl px-4">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
@@ -31,12 +31,12 @@ const Header = () => {
                     </nav>
                     <div className="flex items-center space-x-4">
                         <div className="hidden sm:flex items-center space-x-4">
-                            <Link to="/login" className="text-sm font-medium text-white/70 transition-colors hover:text-white">
+                            <Link to="/login" className="text-sm font-medium text-white/78 transition-colors hover:text-white">
                                 Login
                             </Link>
                             <Link
                                 to="/signup"
-                                className="rounded-md bg-[#d9ff72] px-4 py-2 text-sm font-semibold text-[#101914] transition-colors hover:bg-[#c9f35b]"
+                                className="rounded-md bg-[#d9ff72] px-4 py-2 text-sm font-semibold text-[#1f2a24] transition-colors hover:bg-[#c9f35b]"
                             >
                                 Get Started
                             </Link>
@@ -54,21 +54,21 @@ const Header = () => {
 
             {/* Mobile Navigation */}
             {isMenuOpen && (
-                <div className="border-t border-white/10 bg-[#101914] lg:hidden">
+                <div className="border-t border-white/14 bg-[#1f2a24] lg:hidden">
                     <div className="container mx-auto px-4 py-4">
                         <nav className="flex flex-col space-y-4">
                             {navLinks.map((link) => (
-                                <Link key={link.name} to={link.to} className="text-white/70 transition-colors hover:text-white">
+                                <Link key={link.name} to={link.to} className="text-white/78 transition-colors hover:text-white">
                                     {link.name}
                                 </Link>
                             ))}
-                            <div className="flex flex-col space-y-3 pt-4 border-t border-white/10">
-                                <Link to="/login" className="w-full text-left text-white/70 transition-colors hover:text-white">
+                            <div className="flex flex-col space-y-3 pt-4 border-t border-white/14">
+                                <Link to="/login" className="w-full text-left text-white/78 transition-colors hover:text-white">
                                     Login
                                 </Link>
                                 <Link
                                     to="/signup"
-                                    className="rounded-md bg-[#d9ff72] px-4 py-2 text-center font-semibold text-[#101914] transition-colors hover:bg-[#c9f35b]"
+                                    className="rounded-md bg-[#d9ff72] px-4 py-2 text-center font-semibold text-[#1f2a24] transition-colors hover:bg-[#c9f35b]"
                                 >
                                     Get Started
                                 </Link>
@@ -82,3 +82,4 @@ const Header = () => {
 };
 
 export default Header;
+

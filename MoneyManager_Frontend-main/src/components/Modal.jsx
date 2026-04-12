@@ -11,9 +11,9 @@ const Modal = ({ isOpen, onClose, children, title }) => {
         >
             <div className="relative p-4 w-full max-w-2xl max-h-[90vh]">
              
-                <div className="relative rounded-lg border border-white/10 bg-[#0d1711] text-white shadow-2xl">
+                <div className="relative rounded-lg border border-white/14 bg-[#18231d] text-white shadow-2xl">
                    
-                    <div className="flex items-center justify-between border-b border-white/10 p-5 md:p-6">
+                    <div className="flex items-center justify-between border-b border-white/14 p-5 md:p-6">
                         <h3 className="text-xl font-semibold text-white">
                             {title}
                         </h3>
@@ -36,3 +36,4 @@ const Modal = ({ isOpen, onClose, children, title }) => {
 };
 
 export default Modal;
+

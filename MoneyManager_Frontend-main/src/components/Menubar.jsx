@@ -38,7 +38,7 @@ const Menubar = ({ activeMenu }) => {
     };
 
     return (
-        <div className="flex items-center justify-between gap-5 bg-[#101914] text-white border-b border-white/10 py-3 px-4 sm:px-7 sticky top-0 z-30">
+        <div className="flex items-center justify-between gap-5 bg-[#1f2a24] text-white border-b border-white/14 py-3 px-4 sm:px-7 sticky top-0 z-30">
            
             <div className="flex items-center gap-5">
                 <button
@@ -71,9 +71,9 @@ const Menubar = ({ activeMenu }) => {
                 </button>
 
                 {showDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-lg border border-white/10 bg-[#0d1711] py-1 shadow-lg z-50">
+                    <div className="absolute right-0 mt-2 w-48 rounded-lg border border-white/14 bg-[#18231d] py-1 shadow-lg z-50">
                         
-                        <div className="px-4 py-3 border-b border-white/10">
+                        <div className="px-4 py-3 border-b border-white/14">
                             <div className="flex items-center gap-3">
                                 <div className="flex items-center justify-center w-8 h-8 bg-white/[0.06] rounded-full">
                                     {user? (
@@ -90,7 +90,7 @@ const Menubar = ({ activeMenu }) => {
                                     <p className="text-sm font-medium text-white truncate">
                                         {user.fullName}
                                     </p>
-                                    <p className="text-xs text-white/45 truncate">{user.email}</p>
+                                    <p className="text-xs text-white/65 truncate">{user.email}</p>
                                 </div>
                             </div>
                         </div>
@@ -98,9 +98,9 @@ const Menubar = ({ activeMenu }) => {
                         <div className="py-1">
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center gap-3 w-full px-4 py-2 text-sm text-white/70 hover:bg-white/10 transition-colors duration-150"
+                                className="flex items-center gap-3 w-full px-4 py-2 text-sm text-white/78 hover:bg-white/10 transition-colors duration-150"
                             >
-                                <LogOut className="w-4 h-4 text-white/45" />
+                                <LogOut className="w-4 h-4 text-white/65" />
                                 <span>Logout</span>
                             </button>
                         </div>
@@ -109,7 +109,7 @@ const Menubar = ({ activeMenu }) => {
             </div>
 
             {openSideMenu && (
-                <div className="fixed top-[73px] left-0 right-0 bg-[#101914] border-b border-white/10 lg:hidden z-20">
+                <div className="fixed top-[73px] left-0 right-0 bg-[#1f2a24] border-b border-white/14 lg:hidden z-20">
                     <Sidebar activeMenu={activeMenu} />
                 </div>
             )}
@@ -118,3 +118,4 @@ const Menubar = ({ activeMenu }) => {
 };
 
 export default Menubar;
+

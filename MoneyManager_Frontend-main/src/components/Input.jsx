@@ -9,13 +9,13 @@ const Input = ({label, value, onChange, placeholder, type, isSelect, options}) =
     }
     return (
         <div className="mb-4">
-            <label className="text-[13px] text-slate-800 block mb-1">
+            <label className="text-[13px] font-medium text-white/72 block mb-1">
                 {label}
             </label>
             <div className="relative">
                 {isSelect ? (
                     <select
-                        className="w-full bg-black/30 outline-none border border-white/10 rounded-md py-2 px-3 text-white leading focus:outline-none focus:border-[#d9ff72]/70"
+                        className="w-full bg-black/15 outline-none border border-white/14 rounded-md py-2 px-3 text-white leading focus:outline-none focus:border-[#d9ff72]/70"
                         value={value}
                         onChange={(e) => onChange(e)}
                     >
@@ -27,7 +27,7 @@ const Input = ({label, value, onChange, placeholder, type, isSelect, options}) =
                     </select>
                 ): (
                     <input
-                        className="w-full bg-black/30 outline-none border border-white/10 rounded-md py-2 px-3 pr-10 text-white leading-tight focus:outline-none focus:border-[#d9ff72]/70 placeholder:text-white/35"
+                        className="w-full bg-black/15 outline-none border border-white/14 rounded-md py-2 px-3 pr-10 text-white leading-tight focus:outline-none focus:border-[#d9ff72]/70 placeholder:text-white/55"
                         type={type === 'password' ? (showPassword ? 'text' : 'password') : type}
                         placeholder={placeholder}
                         value={value}
@@ -57,3 +57,4 @@ const Input = ({label, value, onChange, placeholder, type, isSelect, options}) =
 }
 
 export default Input;
+

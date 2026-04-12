@@ -3,58 +3,58 @@
 
 body {
   font-family: 'Outfit', sans-serif;
-  background: #070c09;
+  background: #111713;
   overflow-x: hidden;
   color: #f8fafc;
 }
 
 .input-box {
-  @apply w-full flex justify-between gap-3 text-sm text-white bg-black/30 rounded-md px-4 py-3 mb-4 mt-3 border border-white/10 outline-none placeholder:text-white/35 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10;
+  @apply w-full flex justify-between gap-3 text-sm text-white bg-black/15 rounded-md px-4 py-3 mb-4 mt-3 border border-white/14 outline-none placeholder:text-white/55 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10;
 }
 
 .btn-primary {
-  @apply w-full text-sm font-semibold text-[#101914] bg-[#d9ff72] shadow-sm p-[10px] rounded-md my-1 hover:bg-[#c9f35b];
+  @apply w-full text-sm font-semibold text-[#1f2a24] bg-[#d9ff72] shadow-sm p-[10px] rounded-md my-1 hover:bg-[#c9f35b];
 }
 
 .card {
-  @apply bg-[#0d1711] p-6 rounded-lg shadow-sm border border-white/10 text-white;
+  @apply bg-[#18231d] p-6 rounded-lg shadow-sm border border-white/14 text-white;
 }
 
 .glass-card {
-  @apply bg-[#0d1711]/90 border border-white/10 shadow-sm rounded-lg text-white;
+  @apply bg-[#18231d]/90 border border-white/14 shadow-sm rounded-lg text-white;
 }
 
 .panel {
-  @apply bg-[#0d1711] border border-white/10 rounded-lg shadow-sm text-white;
+  @apply bg-[#18231d] border border-white/14 rounded-lg shadow-sm text-white;
 }
 
 .field {
-  @apply w-full rounded-md border border-white/10 bg-black/30 px-3 py-2 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10;
+  @apply w-full rounded-md border border-white/14 bg-black/15 px-3 py-2 text-sm text-white outline-none placeholder:text-white/55 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10;
 }
 
 .field option {
-  color: #101914;
+  color: #1f2a24;
   background: #ffffff;
 }
 
 .label {
-  @apply text-xs font-semibold uppercase tracking-wide text-white/45;
+  @apply text-xs font-semibold uppercase tracking-wide text-white/65;
 }
 
 .icon-btn {
-  @apply inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-white/60 hover:bg-white/10 hover:text-white;
+  @apply inline-flex h-9 w-9 items-center justify-center rounded-md border border-white/14 bg-white/[0.04] text-white/72 hover:bg-white/10 hover:text-white;
 }
 
 .card-btn {
-  @apply flex items-center gap-2 text-[12px] font-semibold text-white/75 hover:text-white bg-white/[0.04] hover:bg-white/10 px-3 py-2 rounded-md border border-white/10 cursor-pointer;
+  @apply flex items-center gap-2 text-[12px] font-semibold text-white/75 hover:text-white bg-white/[0.04] hover:bg-white/10 px-3 py-2 rounded-md border border-white/14 cursor-pointer;
 }
 
 .add-btn {
-  @apply inline-flex items-center justify-center gap-1.5 text-xs md:text-sm font-semibold text-[#101914] whitespace-nowrap bg-[#d9ff72] border border-[#c9f35b] rounded-md px-4 py-2 cursor-pointer hover:bg-[#c9f35b];
+  @apply inline-flex items-center justify-center gap-1.5 text-xs md:text-sm font-semibold text-[#1f2a24] whitespace-nowrap bg-[#d9ff72] border border-[#c9f35b] rounded-md px-4 py-2 cursor-pointer hover:bg-[#c9f35b];
 }
 
 .add-btn-fill {
-  @apply text-[#101914] bg-[#d9ff72];
+  @apply text-[#1f2a24] bg-[#d9ff72];
 }
 
 .section-title {
@@ -62,14 +62,15 @@ body {
 }
 
 .dark-field {
-  @apply w-full rounded-lg border border-white/10 bg-black/30 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/35 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10;
+  @apply w-full rounded-lg border border-white/14 bg-black/15 px-3 py-2.5 text-sm text-white outline-none placeholder:text-white/55 focus:border-[#d9ff72]/70 focus:ring-2 focus:ring-[#d9ff72]/10;
 }
 
 .dark-field option {
-  color: #101914;
+  color: #1f2a24;
   background: #ffffff;
 }
 
 .dark-icon-btn {
-  @apply inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-white/55 hover:bg-white/10 hover:text-white;
+  @apply inline-flex h-8 w-8 items-center justify-center rounded-md border border-white/14 bg-white/[0.04] text-white/78 hover:bg-white/10 hover:text-white;
 }
+
