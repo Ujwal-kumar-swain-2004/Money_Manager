@@ -3,7 +3,7 @@ import {Link} from "react-router-dom";
 
 const HeroSection = () => {
     return (
-        <section className="bg-[#101914] text-white">
+        <section className="bg-[#1f2a24] text-white">
             <div className="mx-auto grid min-h-[calc(100vh-64px)] max-w-7xl items-center gap-10 px-4 py-10 lg:grid-cols-[0.95fr_1.05fr]">
                 <div>
                     <p className="text-sm font-semibold uppercase text-[#d9ff72]">Personal finance OS</p>
@@ -16,7 +16,7 @@ const HeroSection = () => {
                     <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                     <Link
                         to="/signup"
-                        className="inline-flex items-center justify-center rounded-md bg-[#d9ff72] px-6 py-3 font-semibold text-[#101914] transition-all hover:bg-[#c9f35b]"
+                        className="inline-flex items-center justify-center rounded-md bg-[#d9ff72] px-6 py-3 font-semibold text-[#1f2a24] transition-all hover:bg-[#c9f35b]"
                     >
                         Start Tracking for Free
                     </Link>
@@ -28,11 +28,11 @@ const HeroSection = () => {
                     </Link>
                     </div>
                 </div>
-                <div className="rounded-lg border border-white/10 bg-white/8 p-4">
-                    <div className="rounded-lg border border-white/10 bg-[#0d1711] p-5 text-white">
+                <div className="rounded-lg border border-white/14 bg-white/8 p-4">
+                    <div className="rounded-lg border border-white/14 bg-[#18231d] p-5 text-white">
                         <div className="mb-5 flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-semibold uppercase text-white/45">June overview</p>
+                                <p className="text-xs font-semibold uppercase text-white/65">June overview</p>
                                 <p className="text-2xl font-semibold">₹84,250</p>
                             </div>
                             <span className="rounded-md bg-[#d9ff72] px-3 py-1 text-xs font-semibold">Healthy</span>
@@ -44,7 +44,7 @@ const HeroSection = () => {
                         </div>
                         <div className="mt-5 space-y-3">
                             {["Food budget at 62%", "Rent recurring tomorrow", "Emergency goal at 74%"].map((item) => (
-                                <div key={item} className="rounded-md border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80">{item}</div>
+                                <div key={item} className="rounded-md border border-white/14 bg-white/[0.04] px-4 py-3 text-sm font-medium text-white/80">{item}</div>
                             ))}
                         </div>
                     </div>
@@ -55,11 +55,12 @@ const HeroSection = () => {
 };
 
 const HeroMetric = ({icon: Icon, label, value}) => (
-    <div className="rounded-md border border-white/10 bg-white/[0.04] p-4">
+    <div className="rounded-md border border-white/14 bg-white/[0.04] p-4">
         <Icon size={18} className="text-[#31572c]" />
-        <p className="mt-3 text-xs uppercase text-white/45">{label}</p>
+        <p className="mt-3 text-xs uppercase text-white/65">{label}</p>
         <p className="font-semibold">{value}</p>
     </div>
 );
 
 export default HeroSection;
+

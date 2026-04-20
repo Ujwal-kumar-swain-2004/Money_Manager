@@ -60,10 +60,10 @@ const Login = () => {
     }
 
     return (
-        <div className="min-h-screen w-full bg-[#070c09]">
+        <div className="min-h-screen w-full bg-[#111713]">
             <Header />
             <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 lg:grid-cols-[0.95fr_1.05fr]">
-                <div className="hidden rounded-lg bg-[#101914] p-8 text-white lg:block">
+                <div className="hidden rounded-lg bg-[#1f2a24] p-8 text-white lg:block">
                     <p className="text-sm font-semibold uppercase text-[#d9ff72]">Welcome back</p>
                     <h1 className="mt-3 text-4xl font-semibold">Pick up exactly where your money left off.</h1>
                     <div className="mt-10 grid gap-3">
@@ -77,7 +77,7 @@ const Login = () => {
                         <h3 className="text-2xl font-semibold text-white text-center mb-2">
                             Welcome Back
                         </h3>
-                        <p className="text-sm text-white/45 text-center mb-8">
+                        <p className="text-sm text-white/65 text-center mb-8">
                             Sign in to manage budgets, transactions, and savings goals.
                         </p>
 
@@ -100,7 +100,7 @@ const Login = () => {
                             />
 
                             {error && (
-                                <p className="text-red-800 text-sm text-center bg-red-50 p-2 rounded">
+                                <p className="text-red-100 text-sm text-center bg-red-500/15 border border-red-300/20 p-2 rounded">
                                     {error}
                                 </p>
                             )}
@@ -114,7 +114,7 @@ const Login = () => {
                                 ):("LOGIN")}
                             </button>
 
-                            <p className="text-sm text-slate-800 text-center mt-6">
+                            <p className="text-sm text-white/72 text-center mt-6">
                                 Don't have an account?
                                 <Link to="/signup" className="ml-1 font-semibold text-[#31572c] underline">Signup</Link>
                             </p>
@@ -127,11 +127,12 @@ const Login = () => {
 }
 
 const AuthStat = ({icon: Icon, title, text}) => (
-    <div className="rounded-lg border border-white/10 bg-white/10 p-4">
+    <div className="rounded-lg border border-white/14 bg-white/10 p-4">
         <Icon className="text-[#d9ff72]" size={20} />
         <p className="mt-3 font-semibold">{title}</p>
-        <p className="mt-1 text-sm text-white/60">{text}</p>
+        <p className="mt-1 text-sm text-white/72">{text}</p>
     </div>
 );
 
 export default Login;
+

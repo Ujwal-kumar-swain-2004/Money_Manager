@@ -2,11 +2,11 @@ import {assets} from "../assets/assets.js";
 
 const ProductShowcase = () => {
     return (
-        <section className="bg-[#070c09] py-12">
+        <section className="bg-[#111713] py-12">
             <div className="mx-auto max-w-7xl px-4">
                 <img
                     src={assets.landing}
-                    className="h-auto w-full rounded-lg border border-white/10 object-cover shadow-sm"
+                    className="h-auto w-full rounded-lg border border-white/14 object-cover shadow-sm"
                     alt="MoneyWise App Dashboard"
                     onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/1200x600/E2E8F0/4A5568?text=Image+Not+Found'; }}
                 />
@@ -16,3 +16,4 @@ const ProductShowcase = () => {
 };
 
 export default ProductShowcase;
+

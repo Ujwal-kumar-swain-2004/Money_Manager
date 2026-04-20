@@ -4,7 +4,7 @@ import ProductShowcase from "../components/ProductShowcase.jsx";
 
 const LandingPage = () => {
     return (
-        <div className="bg-[#070c09] font-sans text-white">
+        <div className="bg-[#111713] font-sans text-white">
             <Header />
             <main>
                 <HeroSection/>
@@ -15,3 +15,4 @@ const LandingPage = () => {
 }
 
 export default LandingPage;
+
