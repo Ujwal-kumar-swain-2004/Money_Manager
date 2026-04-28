@@ -152,3 +152,4 @@ const AddIncomeForm = ({onAddIncome, categories, familyMembers = []}) => {
 }
 
 export default AddIncomeForm;
+

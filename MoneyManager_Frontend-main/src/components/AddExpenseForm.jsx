@@ -128,3 +128,4 @@ const AddExpenseForm = ({ onAddExpense, categories, familyMembers = [] }) => {
 };
 
 export default AddExpenseForm;
+

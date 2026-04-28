@@ -77,3 +77,4 @@ const IncomeList = ({transactions, onDelete, onDownload, onEmail}) => {
 }
 
 export default IncomeList;
+

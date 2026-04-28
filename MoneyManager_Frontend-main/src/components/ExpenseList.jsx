@@ -37,3 +37,4 @@ const ExpenseList = ({ transactions, onDelete, onDownload, onEmail }) => {
 };
 
 export default ExpenseList;
+

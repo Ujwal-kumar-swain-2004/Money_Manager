@@ -92,7 +92,7 @@ const Filter = () => {
                                 <label htmlFor="keyword" className="label">Search</label>
                                 <input value={keyword} id="keyword" type="text" placeholder="Search..." className="field mt-1" onChange={e => setKeyword(e.target.value)} />
                             </div>
-                            <button onClick={handleSearch} className="mb-1 ml-2 flex h-10 w-10 items-center justify-center rounded-md bg-[#d9ff72] text-[#101914]">
+                            <button onClick={handleSearch} className="mb-1 ml-2 flex h-10 w-10 items-center justify-center rounded-md bg-[#d9ff72] text-[#1f2a24]">
                                 <Search size={20} />
                             </button>
                         </div>
@@ -106,7 +106,7 @@ const Filter = () => {
                         <EmptyState title="No filtered results" description="Select filters and run a search to inspect transactions." />
                     ): ""}
                     {loading ? (
-                        <p className="text-sm text-gray-500">Loading transactions...</p>
+                        <p className="text-sm text-white/70">Loading transactions...</p>
                     ): ("")}
                     <div className="grid gap-3 md:grid-cols-2">
                     {transactions.map((transaction) => (
@@ -128,3 +128,4 @@ const Filter = () => {
 }
 
 export default Filter;
+

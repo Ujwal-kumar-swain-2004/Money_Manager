@@ -15,7 +15,7 @@ const CategoryList = ({categories, onEditCategory}) => {
                     {categories.map((category) => (
                         <div
                             key={category.id}
-                            className="group relative flex items-center gap-4 rounded-lg border border-white/10 bg-white/[0.03] p-4 transition hover:border-[#d9ff72]/30 hover:bg-white/[0.06]">
+                            className="group relative flex items-center gap-4 rounded-lg border border-white/14 bg-white/[0.03] p-4 transition hover:border-[#d9ff72]/30 hover:bg-white/[0.06]">
                           
                             <div className="flex h-12 w-12 items-center justify-center rounded-md bg-white/[0.05] text-xl text-white">
                                 {category.icon ? (
@@ -34,7 +34,7 @@ const CategoryList = ({categories, onEditCategory}) => {
                                     <p className="text-sm text-white font-semibold">
                                         {category.name}
                                     </p>
-                                    <p className="mt-1 inline-flex rounded-md bg-white/[0.06] px-2 py-0.5 text-xs font-medium capitalize text-white/55">
+                                    <p className="mt-1 inline-flex rounded-md bg-white/[0.06] px-2 py-0.5 text-xs font-medium capitalize text-white/78">
                                         {category.type}
                                     </p>
                                 </div>
@@ -57,3 +57,4 @@ const CategoryList = ({categories, onEditCategory}) => {
 }
 
 export default CategoryList;
+

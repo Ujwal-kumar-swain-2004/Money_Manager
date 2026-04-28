@@ -141,7 +141,7 @@ const Category = () => {
                 />
 
                 {loading ? (
-                    <div className="panel p-6 text-center text-sm text-gray-500">Loading categories...</div>
+                    <div className="panel p-6 text-center text-sm text-white/70">Loading categories...</div>
                 ) : (
                     <CategoryList categories={categoryData} onEditCategory={handleEditCategory} />
                 )}
@@ -174,3 +174,4 @@ const Category = () => {
 }
 
 export default Category;
+
