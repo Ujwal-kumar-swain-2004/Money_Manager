@@ -27,19 +27,19 @@ const CustomLineChart = ({ data }) => {
             const categoriesInTooltip = Object.values(groupedItemsForTooltip);
 
             return (
-                <div className="bg-[#0d1711] shadow-md rounded-lg p-2 border border-white/10 text-white">
+                <div className="bg-[#18231d] shadow-md rounded-lg p-2 border border-white/14 text-white">
                  
                     <p className="text-sm font-semibold text-white mb-2">{label}</p>
-                    <hr className="my-1 border-white/10" />
+                    <hr className="my-1 border-white/14" />
                  
-                    <p className="text-sm text-white/70 font-bold mb-2">
+                    <p className="text-sm text-white/78 font-bold mb-2">
                         Total: <span className="text-[#d9ff72]">&#8377;{addThousandsSeparator(dataPoint.totalAmount)}</span>
                     </p>
 
 
                     {categoriesInTooltip && categoriesInTooltip.length > 0 && (
-                        <div className="mt-2 pt-2 border-t border-white/10">
-                            <p className="text-xs font-semibold text-white/45 mb-1">Details:</p>
+                        <div className="mt-2 pt-2 border-t border-white/14">
+                            <p className="text-xs font-semibold text-white/65 mb-1">Details:</p>
                             {categoriesInTooltip.map((groupedItem, index) => (
                                 <div key={index} className="flex justify-between text-xs text-white/65">
                                     <span>{groupedItem.categoryName}:</span>
@@ -85,3 +85,4 @@ const CustomLineChart = ({ data }) => {
 };
 
 export default CustomLineChart;
+

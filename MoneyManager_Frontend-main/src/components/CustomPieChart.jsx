@@ -62,3 +62,4 @@ const CustomPieChart = ({ data, label, totalAmount, showTextAnchor, colors }) =>
 };
 
 export default CustomPieChart;
+

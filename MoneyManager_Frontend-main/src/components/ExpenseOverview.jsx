@@ -38,3 +38,4 @@ const ExpenseOverview = ({transactions, onExpenseIncome}) => {
 };
 
 export default ExpenseOverview;
+

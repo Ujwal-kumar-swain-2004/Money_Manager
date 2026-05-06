@@ -17,3 +17,4 @@ const CustomLegend = ({ payload }) => {
 };
 
 export default CustomLegend;
+
