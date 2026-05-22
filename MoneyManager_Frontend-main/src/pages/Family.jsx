@@ -127,14 +127,14 @@ const Family = () => {
                 />
 
                 {families.length === 0 ? (
-                    <section className="rounded-lg border border-white/10 bg-[#101914] p-6 shadow-sm">
+                    <section className="rounded-lg border border-white/14 bg-[#1f2a24] p-6 shadow-sm">
                         <div className="flex items-center gap-3 text-white">
-                            <div className="grid h-11 w-11 place-items-center rounded-md bg-[#d9ff72] text-[#101914]">
+                            <div className="grid h-11 w-11 place-items-center rounded-md bg-[#d9ff72] text-[#1f2a24]">
                                 <UsersRound size={22} />
                             </div>
                             <div>
                                 <h2 className="text-xl font-semibold">Create your family space</h2>
-                                <p className="text-sm text-white/55">Start with one household, then add father, mother, son, daughter, or roommates.</p>
+                                <p className="text-sm text-white/78">Start with one household, then add father, mother, son, daughter, or roommates.</p>
                             </div>
                         </div>
                         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
@@ -145,12 +145,12 @@ const Family = () => {
                 ) : (
                     <>
                         <section className="grid grid-cols-1 gap-4 lg:grid-cols-[1.5fr_1fr]">
-                            <div className="rounded-lg border border-white/10 bg-[#101914] p-6 text-white">
+                            <div className="rounded-lg border border-white/14 bg-[#1f2a24] p-6 text-white">
                                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                                     <div>
                                         <p className="text-sm font-semibold text-[#d9ff72]">Family overview</p>
                                         <h2 className="mt-2 text-3xl font-black">{dashboard?.name || "Family Money"}</h2>
-                                        <p className="mt-2 text-sm text-white/55">Invite code: {dashboard?.inviteCode || "loading"}</p>
+                                        <p className="mt-2 text-sm text-white/78">Invite code: {dashboard?.inviteCode || "loading"}</p>
                                     </div>
                                     <select className="input-box max-w-xs" value={activeFamilyId} onChange={({target}) => setActiveFamilyId(target.value)}>
                                         {families.map((family) => <option key={family.id} value={family.id}>{family.name}</option>)}
@@ -163,7 +163,7 @@ const Family = () => {
                                 </div>
                             </div>
 
-                            <div className="rounded-lg border border-white/10 bg-[#131c17] p-5">
+                            <div className="rounded-lg border border-white/14 bg-[#131c17] p-5">
                                 <h3 className="flex items-center gap-2 text-lg font-bold text-white"><UserPlus size={18} /> Add member</h3>
                                 <div className="mt-4 grid gap-3">
                                     <input className="input-box" value={memberForm.name} onChange={({target}) => setMemberForm({...memberForm, name: target.value})} placeholder="Name, e.g. Son" />
@@ -183,10 +183,10 @@ const Family = () => {
 
                         <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
                             {members.map((member) => (
-                                <div key={member.id} className="rounded-lg border border-white/10 bg-[#111a15] p-5 text-white">
+                                <div key={member.id} className="rounded-lg border border-white/14 bg-[#111a15] p-5 text-white">
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-sm text-white/50">{member.role}</p>
+                                            <p className="text-sm text-white/68">{member.role}</p>
                                             <h3 className="text-xl font-bold">{member.name}</h3>
                                         </div>
                                         <div className="grid h-10 w-10 place-items-center rounded-md bg-white/10">
@@ -201,11 +201,11 @@ const Family = () => {
                                     </div>
                                 </div>
                             ))}
-                            {!loading && members.length === 0 && <p className="text-white/60">Add members to start tracking family spending.</p>}
+                            {!loading && members.length === 0 && <p className="text-white/72">Add members to start tracking family spending.</p>}
                         </section>
 
                         <section className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
-                            <div className="rounded-lg border border-white/10 bg-[#131c17] p-5">
+                            <div className="rounded-lg border border-white/14 bg-[#131c17] p-5">
                                 <h3 className="text-lg font-bold text-white">Record family transfer</h3>
                                 <div className="mt-4 grid gap-3">
                                     <select className="input-box" value={transferForm.fromMemberId} onChange={({target}) => setTransferForm({...transferForm, fromMemberId: target.value})}>
@@ -224,19 +224,19 @@ const Family = () => {
                                 </div>
                             </div>
 
-                            <div className="rounded-lg border border-white/10 bg-[#101914] p-5">
+                            <div className="rounded-lg border border-white/14 bg-[#1f2a24] p-5">
                                 <h3 className="text-lg font-bold text-white">Recent family movement</h3>
                                 <div className="mt-4 divide-y divide-white/10">
                                     {transfers.map((transfer) => (
                                         <div key={transfer.id} className="flex items-center justify-between gap-4 py-4">
                                             <div>
                                                 <p className="font-semibold text-white">{transfer.fromMemberName || "Household wallet"} → {transfer.toMemberName}</p>
-                                                <p className="text-sm text-white/45">{transfer.transferDate} {transfer.note ? `· ${transfer.note}` : ""}</p>
+                                                <p className="text-sm text-white/65">{transfer.transferDate} {transfer.note ? `· ${transfer.note}` : ""}</p>
                                             </div>
                                             <p className="text-lg font-black text-[#d9ff72]">{currency(transfer.amount)}</p>
                                         </div>
                                     ))}
-                                    {transfers.length === 0 && <p className="py-5 text-sm text-white/50">No family transfers recorded yet.</p>}
+                                    {transfers.length === 0 && <p className="py-5 text-sm text-white/68">No family transfers recorded yet.</p>}
                                 </div>
                             </div>
                         </section>
@@ -248,18 +248,19 @@ const Family = () => {
 };
 
 const SummaryCard = ({icon: Icon, label, value}) => (
-    <div className="rounded-md border border-white/10 bg-white/[0.04] p-4">
+    <div className="rounded-md border border-white/14 bg-white/[0.04] p-4">
         <Icon className="text-[#d9ff72]" size={20} />
-        <p className="mt-4 text-xs uppercase text-white/45">{label}</p>
+        <p className="mt-4 text-xs uppercase text-white/65">{label}</p>
         <p className="mt-1 text-2xl font-black">{value}</p>
     </div>
 );
 
 const Bar = ({label, value, danger, highlight}) => (
     <div className="flex items-center justify-between">
-        <span className="text-white/45">{label}</span>
+        <span className="text-white/65">{label}</span>
         <span className={`${danger ? "text-red-300" : highlight ? "text-[#d9ff72]" : "text-white"} font-bold`}>{value}</span>
     </div>
 );
 
 export default Family;
+

@@ -155,15 +155,15 @@ const MoneyPlan = () => {
     return (
         <Dashboard activeMenu="Money Plan">
             <div className="mx-auto max-w-7xl">
-                <div className="rounded-xl border border-white/10 bg-[#070c09] p-4 text-white shadow-2xl shadow-black/20 md:p-6">
+                <div className="rounded-xl border border-white/14 bg-[#111713] p-4 text-white shadow-2xl shadow-black/20 md:p-6">
                     <section className="grid gap-4 xl:grid-cols-[1.1fr_0.9fr]">
-                        <div className="rounded-xl border border-white/10 bg-[#0d1711] p-5">
+                        <div className="rounded-xl border border-white/14 bg-[#18231d] p-5">
                             <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wide text-[#d9ff72]">Money Plan</p>
                                     <h1 className="mt-2 max-w-3xl text-3xl font-semibold leading-tight md:text-4xl">Plan the month from one command surface.</h1>
                                 </div>
-                                <div className="grid min-w-[260px] grid-cols-2 gap-2 rounded-lg border border-white/10 bg-black/30 p-2">
+                                <div className="grid min-w-[260px] grid-cols-2 gap-2 rounded-lg border border-white/14 bg-black/15 p-2">
                                     <input className="dark-field" type="number" min="1" max="12" value={budgetForm.month} onChange={(e) => setBudgetForm({...budgetForm, month: e.target.value})} />
                                     <input className="dark-field" type="number" value={budgetForm.year} onChange={(e) => setBudgetForm({...budgetForm, year: e.target.value})} />
                                 </div>
@@ -175,8 +175,8 @@ const MoneyPlan = () => {
                             </div>
                         </div>
 
-                        <div className="rounded-xl border border-white/10 bg-[#0d1711] p-5">
-                            <p className="text-xs font-semibold uppercase tracking-wide text-white/45">Quick read</p>
+                        <div className="rounded-xl border border-white/14 bg-[#18231d] p-5">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-white/65">Quick read</p>
                             <div className="mt-5 grid gap-3">
                                 <InsightLine label="Budgets active" value={budgets.length} />
                                 <InsightLine label="Savings goals" value={goals.length} />
@@ -190,9 +190,9 @@ const MoneyPlan = () => {
                         <Panel title="Budget Alerts" action={`${summary?.budgetAlerts?.length || 0} alerts`}>
                             <div className="grid gap-2">
                                 {(summary?.budgetAlerts || []).map((alert) => (
-                                    <div key={alert.budgetId} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                                    <div key={alert.budgetId} className="rounded-lg border border-white/14 bg-white/[0.03] p-3">
                                         <p className="font-semibold text-white">{alert.message}</p>
-                                        <p className="mt-1 text-xs text-white/45">Spent Rs {addThousandsSeparator(alert.spentAmount || 0)} of Rs {addThousandsSeparator(alert.budgetAmount || 0)}</p>
+                                        <p className="mt-1 text-xs text-white/65">Spent Rs {addThousandsSeparator(alert.spentAmount || 0)} of Rs {addThousandsSeparator(alert.budgetAmount || 0)}</p>
                                     </div>
                                 ))}
                                 {(summary?.budgetAlerts || []).length === 0 && <EmptyState text="No budget alerts. Everything is under control." />}
@@ -210,20 +210,20 @@ const MoneyPlan = () => {
                     </section>
 
                     <section className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
-                        <div className="rounded-xl border border-white/10 bg-[#0d1711] p-4">
+                        <div className="rounded-xl border border-white/14 bg-[#18231d] p-4">
                             <div className="mb-4 flex items-center justify-between">
                                 <div>
                                     <p className="text-xs font-semibold uppercase tracking-wide text-[#d9ff72]">Create</p>
                                     <h2 className="text-xl font-semibold">Planning actions</h2>
                                 </div>
-                                <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs text-white/55">Fast entry</span>
+                                <span className="rounded-md border border-white/14 bg-white/5 px-2.5 py-1 text-xs text-white/78">Fast entry</span>
                             </div>
 
                             <div className="space-y-3">
                                 <FeatureForm title="Monthly Budget" icon={CreditCard} onSubmit={saveBudget}>
                                     <select className="dark-field" value={budgetForm.categoryId} onChange={(e) => setBudgetForm({...budgetForm, categoryId: e.target.value})}>
                                         <option value="">Expense category</option>
-                                        {expenseCategories.map((category) => <option key={category.id} value={category.id}>{category.icon} {category.name}</option>)}
+                                        {expenseCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                                     </select>
                                     <input className="dark-field" type="number" placeholder="Budget amount" value={budgetForm.amount} onChange={(e) => setBudgetForm({...budgetForm, amount: e.target.value})} />
                                 </FeatureForm>
@@ -255,7 +255,7 @@ const MoneyPlan = () => {
                                     </div>
                                     <select className="dark-field" value={recurringForm.categoryId} onChange={(e) => setRecurringForm({...recurringForm, categoryId: e.target.value})}>
                                         <option value="">Category</option>
-                                        {categories.filter((category) => category.type === recurringForm.type).map((category) => <option key={category.id} value={category.id}>{category.icon} {category.name}</option>)}
+                                        {categories.filter((category) => category.type === recurringForm.type).map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
                                     </select>
                                     <div className="grid grid-cols-2 gap-2">
                                         <input className="dark-field" type="number" placeholder="Amount" value={recurringForm.amount} onChange={(e) => setRecurringForm({...recurringForm, amount: e.target.value})} />
@@ -288,7 +288,7 @@ const MoneyPlan = () => {
                                         loadContributions(e.target.value);
                                     }}>
                                         <option value="">Savings goal</option>
-                                        {goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.icon} {goal.name}</option>)}
+                                        {goals.map((goal) => <option key={goal.id} value={goal.id}>{goal.name}</option>)}
                                     </select>
                                     <div className="grid grid-cols-2 gap-2">
                                         <input className="dark-field" type="number" placeholder="Amount" value={contributionForm.amount} onChange={(e) => setContributionForm({...contributionForm, amount: e.target.value})} />
@@ -308,14 +308,14 @@ const MoneyPlan = () => {
                                                 <Pie data={analytics?.categoryBreakdown || []} dataKey="amount" nameKey="categoryName" innerRadius={58} outerRadius={92}>
                                                     {(analytics?.categoryBreakdown || []).map((entry, index) => <Cell key={entry.categoryId} fill={colors[index % colors.length]} />)}
                                                 </Pie>
-                                                <Tooltip contentStyle={{background: "#0d1711", border: "1px solid rgba(255,255,255,.12)", color: "#fff"}} />
+                                                <Tooltip contentStyle={{background: "#18231d", border: "1px solid rgba(255,255,255,.12)", color: "#fff"}} />
                                             </PieChart>
                                         </ResponsiveContainer>
                                     </div>
                                     <div className="space-y-2">
                                         {(analytics?.categoryBreakdown || []).map((item) => (
-                                            <div key={item.categoryId} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5">
-                                                <span className="flex items-center gap-2 text-sm text-white/80"><span>{item.icon}</span>{item.categoryName}</span>
+                                            <div key={item.categoryId} className="flex items-center justify-between rounded-lg border border-white/14 bg-white/[0.03] px-3 py-2.5">
+                                                <span className="flex items-center gap-2 text-sm text-white/80"><DisplayIcon icon={item.icon} label={item.categoryName} />{item.categoryName}</span>
                                                 <span className="text-sm font-semibold">Rs {addThousandsSeparator(item.amount)} | {item.percent}%</span>
                                             </div>
                                         ))}
@@ -334,7 +334,7 @@ const MoneyPlan = () => {
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,.08)" />
                                             <XAxis dataKey="name" stroke="rgba(255,255,255,.45)" />
                                             <YAxis stroke="rgba(255,255,255,.45)" />
-                                            <Tooltip contentStyle={{background: "#0d1711", border: "1px solid rgba(255,255,255,.12)", color: "#fff"}} />
+                                            <Tooltip contentStyle={{background: "#18231d", border: "1px solid rgba(255,255,255,.12)", color: "#fff"}} />
                                             <Bar dataKey="amount" fill="#d9ff72" radius={[8, 8, 0, 0]} />
                                         </BarChart>
                                     </ResponsiveContainer>
@@ -359,13 +359,13 @@ const MoneyPlan = () => {
                         </Panel>
 
                         <Panel title="Recurring Rules" action={`${recurring.length} rules`}>
-                            <button className="mb-3 inline-flex rounded-md bg-[#d9ff72] px-3 py-2 text-xs font-semibold text-[#101914]" onClick={processRecurringDue}>Create due transactions</button>
+                            <button className="mb-3 inline-flex rounded-md bg-[#d9ff72] px-3 py-2 text-xs font-semibold text-[#1f2a24]" onClick={processRecurringDue}>Create due transactions</button>
                             <div className="space-y-2">
                                 {recurring.map((item) => (
-                                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-white/14 bg-white/[0.03] p-3">
                                         <div>
-                                            <p className="font-medium text-white">{item.icon} {item.name}</p>
-                                            <p className="text-xs text-white/45">{item.frequency} | {item.paymentMethod} | {item.categoryName}</p>
+                                            <p className="flex items-center gap-2 font-medium text-white"><DisplayIcon icon={item.icon} label={item.name} /> {item.name}</p>
+                                            <p className="text-xs text-white/65">{item.frequency} | {item.paymentMethod} | {item.categoryName}</p>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <p className={item.type === "income" ? "font-semibold text-emerald-300" : "font-semibold text-rose-300"}>Rs {addThousandsSeparator(item.amount)}</p>
@@ -382,10 +382,10 @@ const MoneyPlan = () => {
                         <Panel title="Bills & Subscriptions" action={`${reminders.length} reminders`}>
                             <div className="space-y-2">
                                 {reminders.map((item) => (
-                                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                                    <div key={item.id} className="flex items-center justify-between rounded-lg border border-white/14 bg-white/[0.03] p-3">
                                         <div>
                                             <p className="font-medium text-white">{item.name}</p>
-                                            <p className="text-xs text-white/45">{item.type} | due {item.dueDate} | {item.daysUntilDue} days</p>
+                                            <p className="text-xs text-white/65">{item.type} | due {item.dueDate} | {item.daysUntilDue} days</p>
                                         </div>
                                         <div className="flex items-center gap-2">
                                             <p className="font-semibold text-[#d9ff72]">Rs {addThousandsSeparator(item.amount || 0)}</p>
@@ -400,9 +400,9 @@ const MoneyPlan = () => {
                         <Panel title="Contribution History" action={`${contributions.length} entries`}>
                             <div className="space-y-2">
                                 {contributions.map((item) => (
-                                    <div key={item.id} className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                                    <div key={item.id} className="rounded-lg border border-white/14 bg-white/[0.03] p-3">
                                         <p className="font-semibold text-white">Rs {addThousandsSeparator(item.amount || 0)}</p>
-                                        <p className="text-xs text-white/45">{item.contributionDate} {item.note ? `| ${item.note}` : ""}</p>
+                                        <p className="text-xs text-white/65">{item.contributionDate} {item.note ? `| ${item.note}` : ""}</p>
                                     </div>
                                 ))}
                                 {contributions.length === 0 && <EmptyState text="Select a goal to view contribution history." />}
@@ -414,7 +414,7 @@ const MoneyPlan = () => {
                         <Panel title="Spending Calendar" action={`${selectedMonth}/${selectedYear}`}>
                             <div className="grid grid-cols-7 gap-1.5 md:gap-2">
                                 {calendarDays.map((day) => (
-                                    <div key={day.date} className={`aspect-square rounded-lg border p-1.5 text-xs ${day.amount > 0 ? "border-[#d9ff72]/40 bg-[#d9ff72]/15 text-[#d9ff72]" : "border-white/10 bg-white/[0.03] text-white/35"}`}>
+                                    <div key={day.date} className={`aspect-square rounded-lg border p-1.5 text-xs ${day.amount > 0 ? "border-[#d9ff72]/40 bg-[#d9ff72]/15 text-[#d9ff72]" : "border-white/14 bg-white/[0.03] text-white/78"}`}>
                                         <p>{day.day}</p>
                                         {day.amount > 0 && <p className="mt-1 truncate font-semibold">Rs {day.amount}</p>}
                                     </div>
@@ -429,68 +429,84 @@ const MoneyPlan = () => {
 };
 
 const Metric = ({icon: Icon, label, value}) => (
-    <div className="rounded-xl border border-white/10 bg-white/[0.04] p-4">
+    <div className="rounded-xl border border-white/14 bg-white/[0.04] p-4">
         <Icon className="mb-3 text-[#d9ff72]" size={22} />
-        <p className="text-xs uppercase text-white/45">{label}</p>
+        <p className="text-xs uppercase text-white/65">{label}</p>
         <p className="mt-1 text-xl font-semibold text-white">{value}</p>
     </div>
 );
 
 const InsightLine = ({label, value}) => (
-    <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3">
-        <span className="text-sm text-white/55">{label}</span>
+    <div className="flex items-center justify-between rounded-lg border border-white/14 bg-white/[0.03] px-4 py-3">
+        <span className="text-sm text-white/78">{label}</span>
         <span className="text-lg font-semibold text-white">{value}</span>
     </div>
 );
 
 const ForecastTile = ({label, value, highlight}) => (
-    <div className={`rounded-lg border p-4 ${highlight ? "border-[#d9ff72]/40 bg-[#d9ff72]/10" : "border-white/10 bg-white/[0.03]"}`}>
-        <p className="text-xs font-semibold uppercase text-white/45">{label}</p>
+    <div className={`rounded-lg border p-4 ${highlight ? "border-[#d9ff72]/40 bg-[#d9ff72]/10" : "border-white/14 bg-white/[0.03]"}`}>
+        <p className="text-xs font-semibold uppercase text-white/65">{label}</p>
         <p className={`mt-2 text-xl font-semibold ${highlight ? "text-[#d9ff72]" : "text-white"}`}>Rs {addThousandsSeparator(value || 0)}</p>
     </div>
 );
 
 const FeatureForm = ({title, icon: Icon, onSubmit, children}) => (
-    <form onSubmit={onSubmit} className="rounded-xl border border-white/10 bg-black/20 p-4">
+    <form onSubmit={onSubmit} className="rounded-xl border border-white/14 bg-black/15 p-4">
         <div className="mb-4 flex items-center justify-between">
             <h2 className="flex items-center gap-2 text-base font-semibold text-white"><Icon size={18} /> {title}</h2>
-            <button className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#d9ff72] text-[#101914] hover:bg-[#c9f35b]" type="submit"><Plus size={18} /></button>
+            <button className="inline-flex h-9 w-9 items-center justify-center rounded-md bg-[#d9ff72] text-[#1f2a24] hover:bg-[#c9f35b]" type="submit"><Plus size={18} /></button>
         </div>
         <div className="space-y-2.5">{children}</div>
     </form>
 );
 
 const Panel = ({title, action, children}) => (
-    <div className="rounded-xl border border-white/10 bg-[#0d1711] p-4 text-white">
+    <div className="rounded-xl border border-white/14 bg-[#18231d] p-4 text-white">
         <div className="mb-4 flex items-center justify-between gap-3">
             <h2 className="text-lg font-semibold">{title}</h2>
-            <span className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-medium text-white/50">{action}</span>
+            <span className="rounded-md border border-white/14 bg-white/5 px-2.5 py-1 text-xs font-medium text-white/68">{action}</span>
         </div>
         {children}
     </div>
 );
 
 const ProgressRow = ({icon, title, subtitle, percent, onDelete}) => (
-    <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+    <div className="rounded-lg border border-white/14 bg-white/[0.03] p-3">
         <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-                <p className="font-medium text-white">{icon} {title}</p>
-                <p className="text-xs text-white/45">{subtitle}</p>
+            <div className="min-w-0">
+                <p className="flex items-center gap-2 font-medium text-white">
+                    <DisplayIcon icon={icon} label={title} />
+                    <span className="min-w-0 truncate">{title}</span>
+                </p>
+                <p className="text-xs text-white/65">{subtitle}</p>
             </div>
             <button className="dark-icon-btn" onClick={onDelete}><Trash2 size={16} /></button>
         </div>
         <div className="h-2 overflow-hidden rounded-full bg-white/10">
             <div className="h-full rounded-full bg-[#d9ff72]" style={{width: `${Math.min(Number(percent), 100)}%`}} />
         </div>
-        <p className="mt-1 text-right text-xs font-medium text-white/45">{Number(percent).toFixed(1)}%</p>
+        <p className="mt-1 text-right text-xs font-medium text-white/65">{Number(percent).toFixed(1)}%</p>
     </div>
 );
 
+const DisplayIcon = ({icon, label}) => {
+    if (!icon || icon === "*") {
+        return <span className="grid h-7 w-7 shrink-0 place-items-center rounded-md bg-white/10 text-xs font-semibold text-[#d9ff72]">{label?.slice(0, 2)?.toUpperCase() || "₹"}</span>;
+    }
+
+    if (typeof icon === "string" && /^https?:\/\//i.test(icon)) {
+        return <img src={icon} alt={label || "icon"} className="h-6 w-6 shrink-0 rounded-sm object-contain" />;
+    }
+
+    return <span className="shrink-0 text-lg leading-none">{icon}</span>;
+};
+
 const EmptyState = ({text}) => (
-    <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] px-4 py-6 text-center text-sm text-white/45">
+    <div className="rounded-lg border border-dashed border-white/14 bg-white/[0.03] px-4 py-6 text-center text-sm text-white/65">
         <Landmark className="mx-auto mb-2 text-white/30" size={22} />
         {text}
     </div>
 );
 
 export default MoneyPlan;
+
