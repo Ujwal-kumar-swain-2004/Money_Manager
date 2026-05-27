@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: moneymanager-db
+    ports:
+      - "5439:5432"
+    environment:
+      POSTGRES_DB: moneymanager
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./Money_Manager-main/moneymanager
+      dockerfile: Dockerfile
+    container_name: moneymanager-backend
+    ports:
+      - "8082:8080"
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/moneymanager
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - JWT_SECRET=supersecretjwtkeythatislongenoughformyapptobesecure12345
+      - PORT=8080
+      - BREVO_SMTP_LOGIN=placeholder_login
+      - BREVO_SMTP_KEY=placeholder_key
+      - BREVO_FROM_EMAIL=noreply@moneymanager.com
+      - FRONTEND_URL=http://localhost:80
+      - BACKEND_URL=http://localhost:8082
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./MoneyManager_Frontend-main
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:8082/api/v1.0
+    container_name: moneymanager-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
