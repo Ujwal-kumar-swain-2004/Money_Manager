@@ -42,4 +42,14 @@ public class EmailService {
         helper.addAttachment(filename, new ByteArrayResource(attachment));
         mailSender.send(message);
     }
+
+    public void sendHtmlEmail(String to, String subject, String htmlBody) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+        helper.setFrom(fromEmail);
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(htmlBody, true); // true = isHtml
+        mailSender.send(message);
+    }
 }

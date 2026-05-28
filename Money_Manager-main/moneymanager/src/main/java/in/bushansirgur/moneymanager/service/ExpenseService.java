@@ -66,9 +66,15 @@ public class ExpenseService {
         return list.stream().map(this::toDTO).toList();
     }
 
-    //Notifications
+    //Notifications — get expenses for a specific user on a specific date
     public List<ExpenseDTO> getExpensesForUserOnDate(Long profileId, LocalDate date) {
         List<ExpenseEntity> list = expenseRepository.findByProfileIdAndDate(profileId, date);
+        return list.stream().map(this::toDTO).toList();
+    }
+
+    // Fetch expenses for a specific user by profileId and date range (used by scheduled jobs)
+    public List<ExpenseDTO> getExpensesForUserInRange(Long profileId, LocalDate startDate, LocalDate endDate) {
+        List<ExpenseEntity> list = expenseRepository.findByProfileIdAndDateBetween(profileId, startDate, endDate);
         return list.stream().map(this::toDTO).toList();
     }
     private ExpenseEntity toEntity(ExpenseDTO dto, ProfileEntity profile, CategoryEntity category) {

@@ -78,6 +78,12 @@ public class IncomeService {
         return list.stream().map(this::toDTO).toList();
     }
 
+    // Fetch incomes for a specific user by profileId and date range (used by scheduled jobs)
+    public List<IncomeDTO> getIncomesForUserInRange(Long profileId, LocalDate startDate, LocalDate endDate) {
+        List<IncomeEntity> list = incomeRepository.findByProfileIdAndDateBetween(profileId, startDate, endDate);
+        return list.stream().map(this::toDTO).toList();
+    }
+
     //helper methods
     private IncomeEntity toEntity(IncomeDTO dto, ProfileEntity profile, CategoryEntity category) {
         IncomeEntity entity = new IncomeEntity();

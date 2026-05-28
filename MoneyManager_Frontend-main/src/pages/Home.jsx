@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 import RecentTransactions from "../components/RecentTransactions.jsx";
 import FinanceOverview from "../components/FinanceOverview.jsx";
 import Transactions from "../components/Transactions.jsx";
+import AiInsightsCard from "../components/AiInsightsCard.jsx";
 
 const Home = () => {
     useUser();
@@ -94,6 +95,12 @@ const Home = () => {
                             title="Recent Incomes"
                         />
                     </div>
+
+                    {/* AI Spending Insights — full width */}
+                    <div className="mt-2">
+                        <AiInsightsCard />
+                    </div>
+
                 </div>
             </Dashboard>
         </div>
