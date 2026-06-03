@@ -17,6 +17,7 @@ const Income = () => {
     useUser();
     const [incomeData, setIncomeData] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [familyMembers, setFamilyMembers] = useState([]);
     const [loading, setLoading] = useState(false);
 
     const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
@@ -55,8 +56,20 @@ const Income = () => {
         }
     }
 
+    const fetchFamilyMembers = async () => {
+        try {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
+            const family = response.data?.[0];
+            if (!family?.id) return;
+            const membersResponse = await axiosConfig.get(API_ENDPOINTS.FAMILY_MEMBERS(family.id));
+            setFamilyMembers(membersResponse.data || []);
+        } catch (error) {
+            console.log('Failed to fetch family members:', error);
+        }
+    }
+
     const handleAddIncome = async (income) => {
-        const {name, amount, date, icon, categoryId, paymentMethod, notes, tags, receiptUrl} = income;
+        const {name, amount, date, icon, categoryId, paymentMethod, notes, tags, receiptUrl, familyMemberId} = income;
 
         if (!name.trim()) {
             toast.error("Please enter a name");
@@ -95,6 +108,7 @@ const Income = () => {
                 notes,
                 tags,
                 receiptUrl,
+                familyMemberId: familyMemberId || null,
             })
             if (response.status === 201) {
                 setOpenAddIncomeModal(false);
@@ -155,6 +169,7 @@ const Income = () => {
     useEffect(() => {
         fetchIncomeDetails();
         fetchIncomeCategories()
+        fetchFamilyMembers();
     }, []);
 
     return (
@@ -188,6 +203,7 @@ const Income = () => {
                         <AddIncomeForm
                             onAddIncome={(income) => handleAddIncome(income)}
                             categories={categories}
+                            familyMembers={familyMembers}
                         />
                     </Modal>
 

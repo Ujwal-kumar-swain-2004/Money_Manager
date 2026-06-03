@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import EmojiPickerPopup from "./EmojiPickerPopup.jsx";
 import Input from "./Input.jsx";
-const AddExpenseForm = ({ onAddExpense, categories }) => {
+const AddExpenseForm = ({ onAddExpense, categories, familyMembers = [] }) => {
     const [expense, setExpense] = useState({
         name: "",
         categoryId: "",
@@ -12,6 +12,7 @@ const AddExpenseForm = ({ onAddExpense, categories }) => {
         notes: "",
         tags: "",
         receiptUrl: "",
+        familyMemberId: "",
     });
     useEffect(() => {
         if (categories && categories.length > 0 && !expense.categoryId) {
@@ -76,6 +77,19 @@ const AddExpenseForm = ({ onAddExpense, categories }) => {
                     {value: "bank", label: "Bank"},
                 ]}
             />
+
+            {familyMembers.length > 0 && (
+                <Input
+                    label="Family Member"
+                    value={expense.familyMemberId}
+                    onChange={({ target }) => handleChange("familyMemberId", target.value)}
+                    isSelect={true}
+                    options={[
+                        {value: "", label: "Personal / no family member"},
+                        ...familyMembers.map((member) => ({value: member.id, label: `${member.name} (${member.role})`})),
+                    ]}
+                />
+            )}
 
             <Input
                 value={expense.tags}

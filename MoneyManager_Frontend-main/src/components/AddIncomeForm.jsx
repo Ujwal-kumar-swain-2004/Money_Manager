@@ -3,7 +3,7 @@ import EmojiPickerPopup from "./EmojiPickerPopup.jsx";
 import Input from "./Input.jsx";
 import {LoaderCircle} from "lucide-react";
 
-const AddIncomeForm = ({onAddIncome, categories}) => {
+const AddIncomeForm = ({onAddIncome, categories, familyMembers = []}) => {
     const [income, setIncome] = useState({
         name: '',
         amount: '',
@@ -14,6 +14,7 @@ const AddIncomeForm = ({onAddIncome, categories}) => {
         notes: '',
         tags: '',
         receiptUrl: '',
+        familyMemberId: '',
     })
     const [loading, setLoading] = useState(false);
 
@@ -92,6 +93,19 @@ const AddIncomeForm = ({onAddIncome, categories}) => {
                     {value: "bank", label: "Bank"},
                 ]}
             />
+
+            {familyMembers.length > 0 && (
+                <Input
+                    label="Family Member"
+                    value={income.familyMemberId}
+                    onChange={({target}) => handleChange('familyMemberId', target.value)}
+                    isSelect={true}
+                    options={[
+                        {value: "", label: "Personal / no family member"},
+                        ...familyMembers.map((member) => ({value: member.id, label: `${member.name} (${member.role})`})),
+                    ]}
+                />
+            )}
 
             <Input
                 value={income.tags}

@@ -38,6 +38,10 @@ public class IncomeEntity {
     @JoinColumn(name = "profile_id", nullable = false)
     private ProfileEntity profile;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "family_member_id")
+    private FamilyMemberEntity familyMember;
+
     @PrePersist
     public void prePersist() {
         if (this.date == null) {
@@ -147,5 +151,13 @@ public class IncomeEntity {
 
     public void setProfile(ProfileEntity profile) {
         this.profile = profile;
+    }
+
+    public FamilyMemberEntity getFamilyMember() {
+        return familyMember;
+    }
+
+    public void setFamilyMember(FamilyMemberEntity familyMember) {
+        this.familyMember = familyMember;
     }
 }

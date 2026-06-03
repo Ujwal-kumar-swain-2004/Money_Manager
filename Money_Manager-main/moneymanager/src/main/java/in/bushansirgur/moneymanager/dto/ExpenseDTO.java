@@ -17,6 +17,8 @@ public class ExpenseDTO {
     private String notes;
     private String tags;
     private String receiptUrl;
+    private Long familyMemberId;
+    private String familyMemberName;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -107,6 +109,11 @@ public class ExpenseDTO {
     public void setReceiptUrl(String receiptUrl) {
         this.receiptUrl = receiptUrl;
     }
+
+    public Long getFamilyMemberId() { return familyMemberId; }
+    public void setFamilyMemberId(Long familyMemberId) { this.familyMemberId = familyMemberId; }
+    public String getFamilyMemberName() { return familyMemberName; }
+    public void setFamilyMemberName(String familyMemberName) { this.familyMemberName = familyMemberName; }
 
     public LocalDateTime getCreatedAt() {
         return createdAt;

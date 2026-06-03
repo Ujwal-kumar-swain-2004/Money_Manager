@@ -33,4 +33,8 @@ export const API_ENDPOINTS = {
     UPCOMING_BILL_REMINDERS: "/bill-reminders/upcoming",
     MONEY_PLAN_SUMMARY: "/money-plan/summary",
     MONTHLY_ANALYTICS: "/analytics/monthly",
+    FAMILIES: "/families",
+    FAMILY_DASHBOARD: (familyId) => `/families/${familyId}/dashboard`,
+    FAMILY_MEMBERS: (familyId) => `/families/${familyId}/members`,
+    FAMILY_TRANSFERS: (familyId) => `/families/${familyId}/transfers`,
 }

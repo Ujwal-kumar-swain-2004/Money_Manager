@@ -10,6 +10,7 @@ import {Toaster} from "react-hot-toast";
 import LandingPage from "./pages/LandingPage.jsx";
 import AiAdvisor from "./pages/AiAdvisor.jsx";
 import MoneyPlan from "./pages/MoneyPlan.jsx";
+import Family from "./pages/Family.jsx";
 
 const App = () => {
     return (
@@ -25,6 +26,7 @@ const App = () => {
                     <Route path="/category" element={<Category />} />
                     <Route path="/filter" element={<Filter />} />
                     <Route path="/money-plan" element={<MoneyPlan />} />
+                    <Route path="/family" element={<Family />} />
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route path="/ai-advisor" element={<AiAdvisor />} />

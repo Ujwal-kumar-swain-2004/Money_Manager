@@ -18,6 +18,7 @@ const Expense = () => {
     const navigate = useNavigate();
     const [expenseData, setExpenseData] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [familyMembers, setFamilyMembers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
     const [openDeleteAlert, setOpenDeleteAlert] = useState({
@@ -60,8 +61,20 @@ const Expense = () => {
         }
     };
 
+    const fetchFamilyMembers = async () => {
+        try {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
+            const family = response.data?.[0];
+            if (!family?.id) return;
+            const membersResponse = await axiosConfig.get(API_ENDPOINTS.FAMILY_MEMBERS(family.id));
+            setFamilyMembers(membersResponse.data || []);
+        } catch (error) {
+            console.log("Failed to fetch family members:", error);
+        }
+    };
+
     const handleAddExpense = async (expense) => {
-        const { name, categoryId, amount, date, icon, paymentMethod, notes, tags, receiptUrl } = expense; 
+        const { name, categoryId, amount, date, icon, paymentMethod, notes, tags, receiptUrl, familyMemberId } = expense; 
 
         if (!name.trim()) {
             toast.error("Name is required.");
@@ -100,6 +113,7 @@ const Expense = () => {
                 notes,
                 tags,
                 receiptUrl,
+                familyMemberId: familyMemberId || null,
             });
 
             setOpenAddExpenseModal(false);
@@ -173,6 +187,7 @@ const Expense = () => {
     useEffect(() => {
         fetchExpenseDetails();
         fetchExpenseCategories(); 
+        fetchFamilyMembers();
     }, []);
 
     return (
@@ -209,6 +224,7 @@ const Expense = () => {
                         <AddExpenseForm
                             onAddExpense={handleAddExpense}
                             categories={categories} 
+                            familyMembers={familyMembers}
                         />
                     </Modal>
 

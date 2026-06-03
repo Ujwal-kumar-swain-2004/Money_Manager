@@ -3,9 +3,11 @@ package in.bushansirgur.moneymanager.service;
 import in.bushansirgur.moneymanager.dto.ExpenseDTO;
 import in.bushansirgur.moneymanager.entity.CategoryEntity;
 import in.bushansirgur.moneymanager.entity.ExpenseEntity;
+import in.bushansirgur.moneymanager.entity.FamilyMemberEntity;
 import in.bushansirgur.moneymanager.entity.ProfileEntity;
 import in.bushansirgur.moneymanager.repository.CategoryRepository;
 import in.bushansirgur.moneymanager.repository.ExpenseRepository;
+import in.bushansirgur.moneymanager.repository.FamilyMemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
@@ -22,6 +24,8 @@ public class ExpenseService {
     private  CategoryRepository categoryRepository;
     @Autowired
     private  ExpenseRepository expenseRepository;
+    @Autowired
+    private FamilyMemberRepository familyMemberRepository;
     @Autowired
     private  ProfileService profileService;
     public ExpenseDTO addExpense(ExpenseDTO dto) {
@@ -87,6 +91,14 @@ public class ExpenseService {
         entity.setNotes(dto.getNotes());
         entity.setTags(dto.getTags());
         entity.setReceiptUrl(dto.getReceiptUrl());
+        if (dto.getFamilyMemberId() != null) {
+            FamilyMemberEntity familyMember = familyMemberRepository.findById(dto.getFamilyMemberId())
+                    .orElseThrow(() -> new RuntimeException("Family member not found"));
+            if (!familyMember.getFamily().getOwner().getId().equals(profile.getId())) {
+                throw new RuntimeException("Unauthorized family member");
+            }
+            entity.setFamilyMember(familyMember);
+        }
         entity.setProfile(profile);
         entity.setCategory(category);
         return entity;
@@ -105,6 +117,10 @@ public class ExpenseService {
         dto.setNotes(entity.getNotes());
         dto.setTags(entity.getTags());
         dto.setReceiptUrl(entity.getReceiptUrl());
+        if (entity.getFamilyMember() != null) {
+            dto.setFamilyMemberId(entity.getFamilyMember().getId());
+            dto.setFamilyMemberName(entity.getFamilyMember().getName());
+        }
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;
