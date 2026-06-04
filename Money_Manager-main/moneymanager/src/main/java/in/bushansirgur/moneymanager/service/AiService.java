@@ -7,6 +7,7 @@ import in.bushansirgur.moneymanager.entity.ProfileEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -34,8 +35,9 @@ public class AiService {
         @Autowired
         private ProfileService profileService;
 
-        public AiService(ChatClient.Builder builder) {
-                this.chatClient = builder
+        public AiService(ObjectProvider<ChatClient.Builder> builderProvider) {
+                ChatClient.Builder builder = builderProvider.getIfAvailable();
+                this.chatClient = builder == null ? null : builder
                                 .defaultSystem("""
                                                 You are a friendly personal finance advisor for an Indian user.
                                                 You ONLY answer questions about personal finance, budgeting, saving, and spending analysis.
@@ -56,6 +58,9 @@ public class AiService {
                 String context = buildFinancialContext(profile);
 
                 try {
+                        if (chatClient == null) {
+                                return buildFallbackAdvice(userQuestion);
+                        }
                         return chatClient.prompt()
                                 .user(u -> u.text("""
                                                 Here is the financial data for the user:
@@ -80,6 +85,9 @@ public class AiService {
                 String context = buildFinancialContext(profile);
 
                 try {
+                        if (chatClient == null) {
+                                return buildFallbackInsights();
+                        }
                         FinancialInsightsResponse response = chatClient.prompt()
                                 .user(u -> u.text(
                                                 """
@@ -223,6 +231,14 @@ public class AiService {
                                 totalIncome, totalExpense,
                                 totalIncome.subtract(totalExpense),
                                 byCategory);
+
+                if (chatClient == null) {
+                        String fallbackNarrative = String.format(
+                                        "<p>Your %s %s financial report is ready. Total income was Rs %s, total expenses were Rs %s, and net savings were Rs %s.</p><p>Category breakdown: %s. Review flexible spending first and keep upcoming bills planned before the next month starts.</p>",
+                                        month, year, totalIncome, totalExpense, totalIncome.subtract(totalExpense), byCategory);
+                        return buildEmailHtmlTemplate(profile.getFullName(), month, year, fallbackNarrative,
+                                        totalIncome, totalExpense, totalIncome.subtract(totalExpense));
+                }
 
                 String aiNarrative = chatClient.prompt()
                                 .user(u -> u.text(
