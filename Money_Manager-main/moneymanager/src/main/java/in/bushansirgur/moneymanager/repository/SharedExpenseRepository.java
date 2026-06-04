@@ -2,11 +2,21 @@ package in.bushansirgur.moneymanager.repository;
 
 import in.bushansirgur.moneymanager.entity.SharedExpenseEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface SharedExpenseRepository extends JpaRepository<SharedExpenseEntity, Long> {
-    List<SharedExpenseEntity> findByProfileIdOrderByExpenseDateDesc(Long profileId);
+    @Query("""
+            select expense from SharedExpenseEntity expense
+            left join fetch expense.paidByFriend
+            left join fetch expense.group
+            where expense.profile.id = :profileId
+            order by expense.expenseDate desc
+            """)
+    List<SharedExpenseEntity> findByProfileIdOrderByExpenseDateDesc(@Param("profileId") Long profileId);
+
     Optional<SharedExpenseEntity> findByIdAndProfileId(Long id, Long profileId);
 }

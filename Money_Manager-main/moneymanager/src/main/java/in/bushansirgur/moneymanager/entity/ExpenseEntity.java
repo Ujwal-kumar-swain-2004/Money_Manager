@@ -13,7 +13,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_expenses")
+@Table(name = "tbl_expenses", indexes = {
+        @Index(name = "idx_expense_profile_date", columnList = "profile_id,date"),
+        @Index(name = "idx_expense_profile_category", columnList = "profile_id,category_id"),
+        @Index(name = "idx_expense_profile_payment_method", columnList = "profile_id,payment_method"),
+        @Index(name = "idx_expense_profile_family_member", columnList = "profile_id,family_member_id")
+})
 public class ExpenseEntity {
 
     @Id

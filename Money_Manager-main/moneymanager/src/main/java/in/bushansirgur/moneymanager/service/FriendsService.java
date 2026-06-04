@@ -142,12 +142,28 @@ public class FriendsService {
 
     public List<FriendsDTO.FriendGroupDTO> getGroups() {
         ProfileEntity profile = profileService.getCurrentProfile();
-        return groupRepository.findByProfileIdOrderByIdDesc(profile.getId()).stream().map(this::toGroupDTO).toList();
+        List<FriendGroupEntity> groups = groupRepository.findByProfileIdOrderByIdDesc(profile.getId());
+        List<Long> groupIds = groups.stream().map(FriendGroupEntity::getId).toList();
+        Map<Long, List<FriendGroupMemberEntity>> membersByGroupId = groupIds.isEmpty()
+                ? Map.of()
+                : groupMemberRepository.findByGroupIdInWithFriend(groupIds).stream()
+                .collect(Collectors.groupingBy(member -> member.getGroup().getId()));
+        return groups.stream().map(group -> toGroupDTO(group, membersByGroupId)).toList();
     }
 
     public List<FriendsDTO.SharedExpenseDTO> getExpenses() {
         ProfileEntity profile = profileService.getCurrentProfile();
-        return expenseRepository.findByProfileIdOrderByExpenseDateDesc(profile.getId()).stream().map(this::toExpenseDTO).toList();
+        List<SharedExpenseEntity> expenses = expenseRepository.findByProfileIdOrderByExpenseDateDesc(profile.getId());
+        List<Long> expenseIds = expenses.stream().map(SharedExpenseEntity::getId).toList();
+        Map<Long, List<SharedExpenseSplitEntity>> splitsByExpenseId = expenseIds.isEmpty()
+                ? Map.of()
+                : splitRepository.findByExpenseIdInWithFriend(expenseIds).stream()
+                .collect(Collectors.groupingBy(split -> split.getExpense().getId()));
+        Map<Long, List<FriendCommentEntity>> commentsByExpenseId = expenseIds.isEmpty()
+                ? Map.of()
+                : commentRepository.findByExpenseIdInOrderByCreatedAtDesc(expenseIds).stream()
+                .collect(Collectors.groupingBy(comment -> comment.getExpense().getId()));
+        return expenses.stream().map(expense -> toExpenseDTO(expense, splitsByExpenseId, commentsByExpenseId)).toList();
     }
 
     public List<FriendsDTO.SettlementDTO> getSettlements() {
@@ -196,6 +212,10 @@ public class FriendsService {
         Map<Long, BigDecimal> balances = friendRepository.findByProfileIdOrderByNameAsc(profileId).stream()
                 .collect(Collectors.toMap(FriendEntity::getId, friend -> defaultAmount(friend.getOpeningBalance())));
         List<SharedExpenseSplitEntity> splits = splitRepository.findByExpenseProfileId(profileId);
+        Map<Long, BigDecimal> splitTotalsByExpenseId = splits.stream()
+                .collect(Collectors.groupingBy(split -> split.getExpense().getId(),
+                        Collectors.mapping(split -> defaultAmount(split.getAmount()),
+                                Collectors.reducing(BigDecimal.ZERO, BigDecimal::add))));
         for (SharedExpenseSplitEntity split : splits) {
             Long friendId = split.getFriend().getId();
             SharedExpenseEntity expense = split.getExpense();
@@ -203,7 +223,7 @@ public class FriendsService {
             if (expense.getPaidByFriend() == null) {
                 balances.merge(friendId, amount, BigDecimal::add);
             } else if (expense.getPaidByFriend().getId().equals(friendId)) {
-                BigDecimal userShare = defaultAmount(expense.getAmount()).subtract(totalSplitAmount(expense.getId()));
+                BigDecimal userShare = defaultAmount(expense.getAmount()).subtract(splitTotalsByExpenseId.getOrDefault(expense.getId(), BigDecimal.ZERO));
                 balances.merge(friendId, userShare.negate(), BigDecimal::add);
             }
         }
@@ -268,16 +288,30 @@ public class FriendsService {
     }
 
     private FriendsDTO.FriendGroupDTO toGroupDTO(FriendGroupEntity entity) {
+        return toGroupDTO(entity, Map.of(entity.getId(), groupMemberRepository.findByGroupId(entity.getId())));
+    }
+
+    private FriendsDTO.FriendGroupDTO toGroupDTO(FriendGroupEntity entity, Map<Long, List<FriendGroupMemberEntity>> membersByGroupId) {
         FriendsDTO.FriendGroupDTO dto = new FriendsDTO.FriendGroupDTO();
         dto.id = entity.getId();
         dto.name = entity.getName();
         dto.type = entity.getType();
         dto.icon = entity.getIcon();
-        dto.friendIds = groupMemberRepository.findByGroupId(entity.getId()).stream().map(member -> member.getFriend().getId()).toList();
+        dto.friendIds = membersByGroupId.getOrDefault(entity.getId(), List.of()).stream().map(member -> member.getFriend().getId()).toList();
         return dto;
     }
 
     private FriendsDTO.SharedExpenseDTO toExpenseDTO(SharedExpenseEntity entity) {
+        return toExpenseDTO(entity,
+                Map.of(entity.getId(), splitRepository.findByExpenseId(entity.getId())),
+                Map.of(entity.getId(), commentRepository.findByExpenseIdOrderByCreatedAtDesc(entity.getId())));
+    }
+
+    private FriendsDTO.SharedExpenseDTO toExpenseDTO(
+            SharedExpenseEntity entity,
+            Map<Long, List<SharedExpenseSplitEntity>> splitsByExpenseId,
+            Map<Long, List<FriendCommentEntity>> commentsByExpenseId
+    ) {
         FriendsDTO.SharedExpenseDTO dto = new FriendsDTO.SharedExpenseDTO();
         dto.id = entity.getId();
         dto.title = entity.getTitle();
@@ -294,8 +328,8 @@ public class FriendsService {
             dto.groupId = entity.getGroup().getId();
             dto.groupName = entity.getGroup().getName();
         }
-        dto.splits = splitRepository.findByExpenseId(entity.getId()).stream().map(this::toSplitDTO).toList();
-        dto.comments = commentRepository.findByExpenseIdOrderByCreatedAtDesc(entity.getId()).stream().map(this::toCommentDTO).toList();
+        dto.splits = splitsByExpenseId.getOrDefault(entity.getId(), List.of()).stream().map(this::toSplitDTO).toList();
+        dto.comments = commentsByExpenseId.getOrDefault(entity.getId(), List.of()).stream().map(this::toCommentDTO).toList();
         return dto;
     }
 

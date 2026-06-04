@@ -5,7 +5,10 @@ import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
-@Table(name = "tbl_shared_expense_splits")
+@Table(name = "tbl_shared_expense_splits", indexes = {
+        @Index(name = "idx_shared_split_expense", columnList = "expense_id"),
+        @Index(name = "idx_shared_split_friend", columnList = "friend_id")
+})
 public class SharedExpenseSplitEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

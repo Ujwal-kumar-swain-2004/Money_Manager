@@ -8,7 +8,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_shared_expenses")
+@Table(name = "tbl_shared_expenses", indexes = {
+        @Index(name = "idx_shared_expense_profile_date", columnList = "profile_id,expense_date"),
+        @Index(name = "idx_shared_expense_group", columnList = "group_id"),
+        @Index(name = "idx_shared_expense_paid_by_friend", columnList = "paid_by_friend_id")
+})
 public class SharedExpenseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

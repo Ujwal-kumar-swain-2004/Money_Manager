@@ -8,7 +8,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_family_transfers")
+@Table(name = "tbl_family_transfers", indexes = {
+        @Index(name = "idx_family_transfer_family_date", columnList = "family_id,transfer_date"),
+        @Index(name = "idx_family_transfer_from_member", columnList = "from_member_id"),
+        @Index(name = "idx_family_transfer_to_member", columnList = "to_member_id")
+})
 public class FamilyTransferEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

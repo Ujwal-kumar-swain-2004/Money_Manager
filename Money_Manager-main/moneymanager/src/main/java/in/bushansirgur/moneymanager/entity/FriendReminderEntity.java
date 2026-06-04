@@ -8,7 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_friend_reminders")
+@Table(name = "tbl_friend_reminders", indexes = {
+        @Index(name = "idx_reminder_profile_due", columnList = "profile_id,due_date"),
+        @Index(name = "idx_reminder_friend", columnList = "friend_id")
+})
 public class FriendReminderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,7 +9,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_incomes")
+@Table(name = "tbl_incomes", indexes = {
+        @Index(name = "idx_income_profile_date", columnList = "profile_id,date"),
+        @Index(name = "idx_income_profile_category", columnList = "profile_id,category_id"),
+        @Index(name = "idx_income_profile_payment_method", columnList = "profile_id,payment_method"),
+        @Index(name = "idx_income_profile_family_member", columnList = "profile_id,family_member_id")
+})
 public class IncomeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

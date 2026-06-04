@@ -8,7 +8,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_budgets")
+@Table(name = "tbl_budgets", indexes = {
+        @Index(name = "idx_budget_profile_month_year", columnList = "profile_id,month,year"),
+        @Index(name = "idx_budget_profile_category_month_year", columnList = "profile_id,category_id,month,year", unique = true)
+})
 public class BudgetEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

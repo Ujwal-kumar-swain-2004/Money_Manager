@@ -9,7 +9,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_recurring_transactions")
+@Table(name = "tbl_recurring_transactions", indexes = {
+        @Index(name = "idx_recurring_profile_next_run", columnList = "profile_id,next_run_date"),
+        @Index(name = "idx_recurring_active_next_run", columnList = "active,next_run_date")
+})
 public class RecurringTransactionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

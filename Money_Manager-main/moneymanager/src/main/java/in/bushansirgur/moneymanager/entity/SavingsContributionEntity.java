@@ -8,7 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_savings_contributions")
+@Table(name = "tbl_savings_contributions", indexes = {
+        @Index(name = "idx_savings_contribution_goal_date", columnList = "goal_id,contribution_date"),
+        @Index(name = "idx_savings_contribution_profile_date", columnList = "profile_id,contribution_date")
+})
 public class SavingsContributionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -9,7 +9,11 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "tbl_friends")
+@Table(name = "tbl_friends", indexes = {
+        @Index(name = "idx_friend_profile_status", columnList = "profile_id,status"),
+        @Index(name = "idx_friend_profile_name", columnList = "profile_id,name"),
+        @Index(name = "idx_friend_invite_code", columnList = "invite_code", unique = true)
+})
 public class FriendEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

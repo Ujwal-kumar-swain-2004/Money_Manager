@@ -3,7 +3,11 @@ package in.bushansirgur.moneymanager.entity;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "tbl_friend_group_members")
+@Table(name = "tbl_friend_group_members", indexes = {
+        @Index(name = "idx_friend_group_member_group", columnList = "group_id"),
+        @Index(name = "idx_friend_group_member_friend", columnList = "friend_id"),
+        @Index(name = "idx_friend_group_member_unique", columnList = "group_id,friend_id", unique = true)
+})
 public class FriendGroupMemberEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

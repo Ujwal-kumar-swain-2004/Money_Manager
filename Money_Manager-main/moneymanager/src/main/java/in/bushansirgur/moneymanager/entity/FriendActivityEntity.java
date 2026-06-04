@@ -6,7 +6,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_friend_activities")
+@Table(name = "tbl_friend_activities", indexes = {
+        @Index(name = "idx_friend_activity_profile_created", columnList = "profile_id,created_at")
+})
 public class FriendActivityEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

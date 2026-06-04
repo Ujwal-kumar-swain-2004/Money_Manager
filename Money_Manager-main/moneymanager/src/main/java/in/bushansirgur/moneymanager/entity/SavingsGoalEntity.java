@@ -9,7 +9,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_savings_goals")
+@Table(name = "tbl_savings_goals", indexes = {
+        @Index(name = "idx_savings_goal_profile_target_date", columnList = "profile_id,target_date")
+})
 public class SavingsGoalEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

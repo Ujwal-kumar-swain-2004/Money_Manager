@@ -7,7 +7,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_profiles")
+@Table(name = "tbl_profiles", indexes = {
+        @Index(name = "idx_profiles_email", columnList = "email", unique = true),
+        @Index(name = "idx_profiles_activation_token", columnList = "activation_token")
+})
 public class ProfileEntity {
 
     @Id

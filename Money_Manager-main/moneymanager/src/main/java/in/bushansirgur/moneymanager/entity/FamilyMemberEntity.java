@@ -7,7 +7,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_family_members")
+@Table(name = "tbl_family_members", indexes = {
+        @Index(name = "idx_family_member_family", columnList = "family_id"),
+        @Index(name = "idx_family_member_profile", columnList = "profile_id")
+})
 public class FamilyMemberEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

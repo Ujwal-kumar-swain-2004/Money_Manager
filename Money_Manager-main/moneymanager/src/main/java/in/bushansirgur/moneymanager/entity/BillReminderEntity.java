@@ -9,7 +9,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_bill_reminders")
+@Table(name = "tbl_bill_reminders", indexes = {
+        @Index(name = "idx_bill_profile_due_date", columnList = "profile_id,due_date"),
+        @Index(name = "idx_bill_profile_paid", columnList = "profile_id,paid")
+})
 public class BillReminderEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

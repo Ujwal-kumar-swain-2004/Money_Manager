@@ -8,7 +8,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_friend_settlements")
+@Table(name = "tbl_friend_settlements", indexes = {
+        @Index(name = "idx_settlement_profile_date", columnList = "profile_id,settlement_date"),
+        @Index(name = "idx_settlement_friend", columnList = "friend_id")
+})
 public class FriendSettlementEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

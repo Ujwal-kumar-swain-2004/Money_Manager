@@ -6,7 +6,10 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_families")
+@Table(name = "tbl_families", indexes = {
+        @Index(name = "idx_family_owner", columnList = "owner_profile_id"),
+        @Index(name = "idx_family_invite_code", columnList = "invite_code", unique = true)
+})
 public class FamilyEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -11,7 +11,10 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "tbl_categories")
+@Table(name = "tbl_categories", indexes = {
+        @Index(name = "idx_category_profile_type", columnList = "profile_id,type"),
+        @Index(name = "idx_category_profile_name_type", columnList = "profile_id,name,type", unique = true)
+})
 public class CategoryEntity {
 
     @Id
