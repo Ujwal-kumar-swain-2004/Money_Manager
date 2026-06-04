@@ -1,5 +1,6 @@
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import toast from "react-hot-toast";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CalendarDays, CreditCard, IndianRupee, Landmark, Plus, Repeat2, Target, Trash2, WalletCards} from "lucide-react";
 import Dashboard from "../components/Dashboard.jsx";
@@ -7,6 +8,7 @@ import {useUser} from "../hooks/useUser.jsx";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import {addThousandsSeparator} from "../util/util.js";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const paymentMethods = ["cash", "UPI", "card", "bank"];
 const colors = ["#d9ff72", "#86efac", "#38bdf8", "#fbbf24", "#fb7185", "#a78bfa"];
@@ -19,28 +21,19 @@ const emptyContribution = {goalId: "", amount: "", contributionDate: new Date().
 
 const MoneyPlan = () => {
     useUser();
-    const [categories, setCategories] = useState([]);
-    const [budgets, setBudgets] = useState([]);
-    const [goals, setGoals] = useState([]);
-    const [recurring, setRecurring] = useState([]);
-    const [analytics, setAnalytics] = useState(null);
-    const [summary, setSummary] = useState(null);
-    const [reminders, setReminders] = useState([]);
+    const queryClient = useQueryClient();
     const [contributions, setContributions] = useState([]);
     const [budgetForm, setBudgetForm] = useState(emptyBudget);
     const [goalForm, setGoalForm] = useState(emptyGoal);
     const [recurringForm, setRecurringForm] = useState(emptyRecurring);
     const [reminderForm, setReminderForm] = useState(emptyReminder);
     const [contributionForm, setContributionForm] = useState(emptyContribution);
-    const [loading, setLoading] = useState(false);
-
-    const expenseCategories = useMemo(() => categories.filter((category) => category.type === "expense"), [categories]);
     const selectedMonth = Number(budgetForm.month);
     const selectedYear = Number(budgetForm.year);
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
+    const {data: planData = {}, isLoading: loading, refetch: loadData} = useQuery({
+        queryKey: queryKeys.moneyPlan(selectedMonth, selectedYear),
+        queryFn: async () => {
             const [categoryRes, budgetRes, goalRes, recurringRes, analyticsRes, summaryRes, reminderRes] = await Promise.all([
                 axiosConfig.get(API_ENDPOINTS.GET_ALL_CATEGORIES),
                 axiosConfig.get(API_ENDPOINTS.BUDGETS, {params: {month: selectedMonth, year: selectedYear}}),
@@ -50,24 +43,37 @@ const MoneyPlan = () => {
                 axiosConfig.get(API_ENDPOINTS.MONEY_PLAN_SUMMARY, {params: {month: selectedMonth, year: selectedYear, forecastDays: 30}}),
                 axiosConfig.get(API_ENDPOINTS.BILL_REMINDERS),
             ]);
-            setCategories(categoryRes.data || []);
-            setBudgets(budgetRes.data || []);
-            setGoals(goalRes.data || []);
-            setRecurring(recurringRes.data || []);
-            setAnalytics(analyticsRes.data || null);
-            setSummary(summaryRes.data || null);
-            setReminders(reminderRes.data || []);
-        } catch (error) {
+            return {
+                categories: categoryRes.data || [],
+                budgets: budgetRes.data || [],
+                goals: goalRes.data || [],
+                recurring: recurringRes.data || [],
+                analytics: analyticsRes.data || null,
+                summary: summaryRes.data || null,
+                reminders: reminderRes.data || [],
+            };
+        },
+        staleTime: cacheTimes.moneyPlan,
+        onError: (error) => {
             console.error("Failed to load money plan:", error);
             toast.error("Failed to load money plan");
-        } finally {
-            setLoading(false);
-        }
-    };
+        },
+    });
 
-    useEffect(() => {
-        loadData();
-    }, [selectedMonth, selectedYear]);
+    const categories = planData.categories || [];
+    const budgets = planData.budgets || [];
+    const goals = planData.goals || [];
+    const recurring = planData.recurring || [];
+    const analytics = planData.analytics || null;
+    const summary = planData.summary || null;
+    const reminders = planData.reminders || [];
+    const expenseCategories = useMemo(() => categories.filter((category) => category.type === "expense"), [categories]);
+
+    const invalidateMoneyPlanCaches = () => {
+        queryClient.invalidateQueries({queryKey: queryKeys.moneyPlan(selectedMonth, selectedYear)});
+        queryClient.invalidateQueries({queryKey: queryKeys.dashboard});
+        queryClient.invalidateQueries({queryKey: queryKeys.aiInsights});
+    };
 
     const saveBudget = async (event) => {
         event.preventDefault();
@@ -75,7 +81,7 @@ const MoneyPlan = () => {
         await axiosConfig.post(API_ENDPOINTS.BUDGETS, {...budgetForm, amount: Number(budgetForm.amount)});
         setBudgetForm(emptyBudget);
         toast.success("Budget saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveGoal = async (event) => {
@@ -88,7 +94,7 @@ const MoneyPlan = () => {
         });
         setGoalForm(emptyGoal);
         toast.success("Goal saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveRecurring = async (event) => {
@@ -101,7 +107,7 @@ const MoneyPlan = () => {
         });
         setRecurringForm(emptyRecurring);
         toast.success("Recurring item saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveReminder = async (event) => {
@@ -110,7 +116,7 @@ const MoneyPlan = () => {
         await axiosConfig.post(API_ENDPOINTS.BILL_REMINDERS, {...reminderForm, amount: Number(reminderForm.amount), categoryId: reminderForm.categoryId || null});
         setReminderForm(emptyReminder);
         toast.success("Reminder saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveContribution = async (event) => {
@@ -119,7 +125,7 @@ const MoneyPlan = () => {
         await axiosConfig.post(API_ENDPOINTS.GOAL_CONTRIBUTIONS(contributionForm.goalId), {...contributionForm, amount: Number(contributionForm.amount)});
         setContributionForm(emptyContribution);
         toast.success("Contribution added");
-        loadData();
+        invalidateMoneyPlanCaches();
         loadContributions(contributionForm.goalId);
     };
 
@@ -135,13 +141,13 @@ const MoneyPlan = () => {
     const processRecurringDue = async () => {
         const response = await axiosConfig.post(API_ENDPOINTS.PROCESS_RECURRING_DUE);
         toast.success(`${response.data?.length || 0} due recurring item(s) created`);
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const remove = async (endpoint, id, message) => {
         await axiosConfig.delete(`${endpoint}/${id}`);
         toast.success(message);
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const calendarMap = new Map((analytics?.calendarSpend || []).map((item) => [item.date, Number(item.amount)]));

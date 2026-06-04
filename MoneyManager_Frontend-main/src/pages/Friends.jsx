@@ -6,13 +6,15 @@ import PageHeader from "../components/PageHeader.jsx";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import {useUser} from "../hooks/useUser.jsx";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const today = new Date().toISOString().slice(0, 10);
 const money = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
 
 const Friends = () => {
     useUser();
-    const [data, setData] = useState({friends: [], groups: [], expenses: [], settlements: [], reminders: [], activities: []});
+    const queryClient = useQueryClient();
     const [friendForm, setFriendForm] = useState({name: "", email: "", phone: "", upiId: "", status: "active"});
     const [groupForm, setGroupForm] = useState({name: "", type: "Trip", icon: "TR", friendIds: []});
     const [expenseForm, setExpenseForm] = useState({title: "", amount: "", category: "Food", expenseDate: today, splitType: "equal", paidByFriendId: "", groupId: "", note: ""});
@@ -20,7 +22,15 @@ const Friends = () => {
     const [settlementForm, setSettlementForm] = useState({friendId: "", amount: "", settlementDate: today, method: "UPI", direction: "friend_paid_you", note: ""});
     const [reminderForm, setReminderForm] = useState({friendId: "", message: "", amount: "", dueDate: today});
     const [commentForm, setCommentForm] = useState({expenseId: "", comment: ""});
-    const [loading, setLoading] = useState(false);
+    const {data = {friends: [], groups: [], expenses: [], settlements: [], reminders: [], activities: []}, isLoading: loading, refetch: loadData} = useQuery({
+        queryKey: queryKeys.friendsDashboard,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.FRIENDS_DASHBOARD);
+            return response.data || {};
+        },
+        staleTime: cacheTimes.friends,
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to load friends"),
+    });
 
     const friends = data.friends || [];
     const groups = data.groups || [];
@@ -34,21 +44,11 @@ const Friends = () => {
         return friends.map((friend) => friend.id);
     }, [expenseForm.groupId, groups, friends]);
 
-    const loadData = async () => {
-        try {
-            setLoading(true);
-            const response = await axiosConfig.get(API_ENDPOINTS.FRIENDS_DASHBOARD);
-            setData(response.data || {});
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load friends");
-        } finally {
-            setLoading(false);
-        }
+    const invalidateFriendsCaches = () => {
+        queryClient.invalidateQueries({queryKey: queryKeys.friendsDashboard});
+        queryClient.invalidateQueries({queryKey: queryKeys.dashboard});
+        queryClient.invalidateQueries({queryKey: queryKeys.aiInsights});
     };
-
-    useEffect(() => {
-        loadData();
-    }, []);
 
     useEffect(() => {
         const firstFriend = friends[0]?.id || "";
@@ -62,13 +62,13 @@ const Friends = () => {
         await axiosConfig.post(API_ENDPOINTS.FRIENDS, friendForm);
         setFriendForm({name: "", email: "", phone: "", upiId: "", status: "active"});
         toast.success("Friend added");
-        loadData();
+        invalidateFriendsCaches();
     };
 
     const updateStatus = async (friendId, status) => {
         await axiosConfig.patch(API_ENDPOINTS.FRIEND_STATUS(friendId), {status});
         toast.success("Friend status updated");
-        loadData();
+        invalidateFriendsCaches();
     };
 
     const addGroup = async (event) => {
@@ -77,7 +77,7 @@ const Friends = () => {
         await axiosConfig.post(API_ENDPOINTS.FRIEND_GROUPS, groupForm);
         setGroupForm({name: "", type: "Trip", icon: "TR", friendIds: []});
         toast.success("Group created");
-        loadData();
+        invalidateFriendsCaches();
     };
 
     const addSharedExpense = async (event) => {
@@ -99,7 +99,7 @@ const Friends = () => {
         setExpenseForm({title: "", amount: "", category: "Food", expenseDate: today, splitType: "equal", paidByFriendId: "", groupId: "", note: ""});
         setSplitDraft({});
         toast.success("Shared expense added");
-        loadData();
+        invalidateFriendsCaches();
     };
 
     const settleUp = async (event) => {
@@ -108,7 +108,7 @@ const Friends = () => {
         await axiosConfig.post(API_ENDPOINTS.FRIEND_SETTLEMENTS, {...settlementForm, amount: Number(settlementForm.amount)});
         setSettlementForm({...settlementForm, amount: "", note: ""});
         toast.success("Settlement recorded");
-        loadData();
+        invalidateFriendsCaches();
     };
 
     const addReminder = async (event) => {
@@ -117,7 +117,7 @@ const Friends = () => {
         await axiosConfig.post(API_ENDPOINTS.FRIEND_REMINDERS, {...reminderForm, amount: Number(reminderForm.amount || 0)});
         setReminderForm({...reminderForm, message: "", amount: ""});
         toast.success("Reminder added");
-        loadData();
+        invalidateFriendsCaches();
     };
 
     const addComment = async (event) => {
@@ -126,7 +126,7 @@ const Friends = () => {
         await axiosConfig.post(API_ENDPOINTS.FRIEND_EXPENSE_COMMENTS(commentForm.expenseId), {comment: commentForm.comment});
         setCommentForm({expenseId: "", comment: ""});
         toast.success("Comment added");
-        loadData();
+        invalidateFriendsCaches();
     };
 
     const toggleGroupFriend = (friendId) => {

@@ -6,47 +6,51 @@ import PageHeader from "../components/PageHeader.jsx";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import {useUser} from "../hooks/useUser.jsx";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const currency = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
 const today = new Date().toISOString().split("T")[0];
 
 const Family = () => {
     useUser();
-    const [families, setFamilies] = useState([]);
+    const queryClient = useQueryClient();
     const [activeFamilyId, setActiveFamilyId] = useState("");
-    const [dashboard, setDashboard] = useState(null);
     const [familyName, setFamilyName] = useState("My Family");
     const [memberForm, setMemberForm] = useState({name: "", role: "Child", monthlyAllowance: ""});
     const [transferForm, setTransferForm] = useState({fromMemberId: "", toMemberId: "", amount: "", transferDate: today, note: ""});
-    const [loading, setLoading] = useState(false);
+
+    const {data: families = []} = useQuery({
+        queryKey: queryKeys.families,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
+            return response.data || [];
+        },
+        staleTime: cacheTimes.family,
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to load families"),
+    });
+
+    const {data: dashboard = null, isLoading: loading, refetch: refetchDashboard} = useQuery({
+        queryKey: queryKeys.familyDashboard(activeFamilyId),
+        enabled: !!activeFamilyId,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILY_DASHBOARD(activeFamilyId));
+            return response.data;
+        },
+        staleTime: cacheTimes.family,
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to load family dashboard"),
+    });
 
     const members = useMemo(() => dashboard?.members || [], [dashboard]);
     const transfers = dashboard?.transfers || [];
 
-    const loadFamilies = async () => {
-        try {
-            const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
-            const list = response.data || [];
-            setFamilies(list);
-            if (list.length > 0) {
-                setActiveFamilyId((current) => current || list[0].id);
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load families");
+    const invalidateFamilyCaches = (familyId = activeFamilyId) => {
+        queryClient.invalidateQueries({queryKey: queryKeys.families});
+        if (familyId) {
+            queryClient.invalidateQueries({queryKey: queryKeys.familyDashboard(familyId)});
+            queryClient.invalidateQueries({queryKey: queryKeys.familyMembers(familyId)});
         }
-    };
-
-    const loadDashboard = async (familyId = activeFamilyId) => {
-        if (!familyId) return;
-        try {
-            setLoading(true);
-            const response = await axiosConfig.get(API_ENDPOINTS.FAMILY_DASHBOARD(familyId));
-            setDashboard(response.data);
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load family dashboard");
-        } finally {
-            setLoading(false);
-        }
+        queryClient.invalidateQueries({queryKey: queryKeys.dashboard});
     };
 
     const createFamily = async () => {
@@ -56,9 +60,9 @@ const Family = () => {
         }
         try {
             const response = await axiosConfig.post(API_ENDPOINTS.FAMILIES, {name: familyName});
-            setFamilies([response.data]);
             setActiveFamilyId(response.data.id);
-            setDashboard(response.data);
+            queryClient.setQueryData(queryKeys.familyDashboard(response.data.id), response.data);
+            invalidateFamilyCaches(response.data.id);
             toast.success("Family space created");
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to create family");
@@ -76,7 +80,7 @@ const Family = () => {
                 monthlyAllowance: Number(memberForm.monthlyAllowance || 0),
             });
             setMemberForm({name: "", role: "Child", monthlyAllowance: ""});
-            await loadDashboard();
+            invalidateFamilyCaches();
             toast.success("Family member added");
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to add member");
@@ -95,7 +99,7 @@ const Family = () => {
                 amount: Number(transferForm.amount),
             });
             setTransferForm({fromMemberId: "", toMemberId: "", amount: "", transferDate: today, note: ""});
-            await loadDashboard();
+            invalidateFamilyCaches();
             toast.success("Money transfer recorded");
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to record transfer");
@@ -103,12 +107,10 @@ const Family = () => {
     };
 
     useEffect(() => {
-        loadFamilies();
-    }, []);
-
-    useEffect(() => {
-        loadDashboard(activeFamilyId);
-    }, [activeFamilyId]);
+        if (families.length > 0) {
+            setActiveFamilyId((current) => current || families[0].id);
+        }
+    }, [families]);
 
     useEffect(() => {
         if (members.length > 0 && !transferForm.toMemberId) {
@@ -123,7 +125,7 @@ const Family = () => {
                     eyebrow="Household ledger"
                     title="Family Money"
                     description="Maintain allowances, family transfers, child spending, shared bills, and who used the money."
-                    action={<button onClick={() => loadDashboard()} className="add-btn"><RefreshCcw size={16} /> Refresh</button>}
+                    action={<button onClick={() => refetchDashboard()} className="add-btn"><RefreshCcw size={16} /> Refresh</button>}
                 />
 
                 {families.length === 0 ? (
