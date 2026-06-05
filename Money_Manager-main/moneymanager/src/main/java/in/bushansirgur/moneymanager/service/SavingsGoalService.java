@@ -19,6 +19,7 @@ public class SavingsGoalService {
     @Autowired private SavingsGoalRepository savingsGoalRepository;
     @Autowired private SavingsContributionRepository savingsContributionRepository;
     @Autowired private ProfileService profileService;
+    @Autowired private CacheInvalidationService cacheInvalidationService;
 
     public SavingsGoalDTO save(SavingsGoalDTO dto) {
         ProfileEntity profile = profileService.getCurrentProfile();
@@ -30,7 +31,9 @@ public class SavingsGoalService {
         entity.setSavedAmount(dto.getSavedAmount());
         entity.setTargetDate(dto.getTargetDate());
         entity.setProfile(profile);
-        return toDTO(savingsGoalRepository.save(entity));
+        SavingsGoalDTO saved = toDTO(savingsGoalRepository.save(entity));
+        cacheInvalidationService.clearMoneyCaches();
+        return saved;
     }
 
     public List<SavingsGoalDTO> list() {
@@ -42,6 +45,7 @@ public class SavingsGoalService {
         ProfileEntity profile = profileService.getCurrentProfile();
         SavingsGoalEntity entity = savingsGoalRepository.findByIdAndProfileId(id, profile.getId()).orElseThrow(() -> new RuntimeException("Goal not found"));
         savingsGoalRepository.delete(entity);
+        cacheInvalidationService.clearMoneyCaches();
     }
 
     public SavingsContributionDTO addContribution(Long goalId, SavingsContributionDTO dto) {
@@ -57,6 +61,7 @@ public class SavingsGoalService {
         BigDecimal savedAmount = goal.getSavedAmount() == null ? BigDecimal.ZERO : goal.getSavedAmount();
         goal.setSavedAmount(savedAmount.add(dto.getAmount()));
         savingsGoalRepository.save(goal);
+        cacheInvalidationService.clearMoneyCaches();
         return toContributionDTO(contribution);
     }
 

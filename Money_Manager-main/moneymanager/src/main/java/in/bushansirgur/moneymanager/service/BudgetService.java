@@ -22,6 +22,7 @@ public class BudgetService {
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private ExpenseRepository expenseRepository;
     @Autowired private ProfileService profileService;
+    @Autowired private CacheInvalidationService cacheInvalidationService;
 
     public BudgetDTO save(BudgetDTO dto) {
         ProfileEntity profile = profileService.getCurrentProfile();
@@ -35,7 +36,9 @@ public class BudgetService {
         entity.setMonth(dto.getMonth());
         entity.setYear(dto.getYear());
         entity.setAmount(dto.getAmount());
-        return toDTO(budgetRepository.save(entity));
+        BudgetDTO saved = toDTO(budgetRepository.save(entity));
+        cacheInvalidationService.clearMoneyCaches();
+        return saved;
     }
 
     public List<BudgetDTO> list(Integer month, Integer year) {
@@ -48,6 +51,7 @@ public class BudgetService {
         BudgetEntity entity = budgetRepository.findByIdAndProfileId(id, profile.getId())
                 .orElseThrow(() -> new RuntimeException("Budget not found"));
         budgetRepository.delete(entity);
+        cacheInvalidationService.clearMoneyCaches();
     }
 
     private BudgetDTO toDTO(BudgetEntity entity) {

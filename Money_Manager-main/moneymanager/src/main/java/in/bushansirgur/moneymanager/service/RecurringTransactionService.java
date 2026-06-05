@@ -23,6 +23,7 @@ public class RecurringTransactionService {
     @Autowired private IncomeRepository incomeRepository;
     @Autowired private ExpenseRepository expenseRepository;
     @Autowired private ProfileService profileService;
+    @Autowired private CacheInvalidationService cacheInvalidationService;
 
     public RecurringTransactionDTO save(RecurringTransactionDTO dto) {
         ProfileEntity profile = profileService.getCurrentProfile();
@@ -40,7 +41,9 @@ public class RecurringTransactionService {
         entity.setActive(dto.getActive());
         entity.setCategory(category);
         entity.setProfile(profile);
-        return toDTO(recurringTransactionRepository.save(entity));
+        RecurringTransactionDTO saved = toDTO(recurringTransactionRepository.save(entity));
+        cacheInvalidationService.clearMoneyCaches();
+        return saved;
     }
 
     public List<RecurringTransactionDTO> list() {
@@ -52,6 +55,7 @@ public class RecurringTransactionService {
         ProfileEntity profile = profileService.getCurrentProfile();
         RecurringTransactionEntity entity = recurringTransactionRepository.findByIdAndProfileId(id, profile.getId()).orElseThrow(() -> new RuntimeException("Recurring transaction not found"));
         recurringTransactionRepository.delete(entity);
+        cacheInvalidationService.clearMoneyCaches();
     }
 
     public List<RecurringTransactionDTO> processDue() {
@@ -85,6 +89,7 @@ public class RecurringTransactionService {
             item.setNextRunDate(nextDate(item.getNextRunDate(), item.getFrequency()));
             recurringTransactionRepository.save(item);
         });
+        cacheInvalidationService.clearMoneyCaches();
         return dueItems.stream().map(this::toDTO).toList();
     }
 

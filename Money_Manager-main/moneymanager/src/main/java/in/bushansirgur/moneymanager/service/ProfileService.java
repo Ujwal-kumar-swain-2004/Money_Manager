@@ -100,6 +100,10 @@ public class ProfileService {
                 .orElseThrow(() -> new UsernameNotFoundException("Profile not found with email: " + authentication.getName()));
     }
 
+    public Long getCurrentProfileId() {
+        return getCurrentProfile().getId();
+    }
+
     public ProfileDTO getPublicProfile(String email) {
         ProfileEntity currentUser;
 

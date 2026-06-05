@@ -30,6 +30,8 @@ public class IncomeService {
     private FamilyMemberRepository familyMemberRepository;
     @Autowired
     private  ProfileService profileService;
+    @Autowired
+    private CacheInvalidationService cacheInvalidationService;
 
     public IncomeDTO addIncome(IncomeDTO dto) {
         ProfileEntity profile = profileService.getCurrentProfile();
@@ -37,6 +39,7 @@ public class IncomeService {
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         IncomeEntity newExpense = toEntity(dto, profile, category);
         newExpense = incomeRepository.save(newExpense);
+        cacheInvalidationService.clearMoneyCaches();
         return toDTO(newExpense);
     }
 
@@ -59,6 +62,7 @@ public class IncomeService {
             throw new RuntimeException("Unauthorized to delete this income");
         }
         incomeRepository.delete(entity);
+        cacheInvalidationService.clearMoneyCaches();
     }
 
     // Get latest 5 incomes for current user

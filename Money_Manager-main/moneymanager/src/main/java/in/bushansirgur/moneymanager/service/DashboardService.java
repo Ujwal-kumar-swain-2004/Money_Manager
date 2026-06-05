@@ -4,8 +4,10 @@ import in.bushansirgur.moneymanager.dto.ExpenseDTO;
 import in.bushansirgur.moneymanager.dto.IncomeDTO;
 import in.bushansirgur.moneymanager.dto.RecentTransactionDTO;
 import in.bushansirgur.moneymanager.entity.ProfileEntity;
+import in.bushansirgur.moneymanager.config.RedisCacheConfig;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedHashMap;
@@ -25,6 +27,7 @@ public class DashboardService {
     @Autowired
     private  ProfileService profileService;
 
+    @Cacheable(value = RedisCacheConfig.DASHBOARD_CACHE, key = "@profileService.getCurrentProfileId()")
     public Map<String, Object> getDashboardData() {
         ProfileEntity profile = profileService.getCurrentProfile();
         Map<String, Object> returnValue = new LinkedHashMap<>();
