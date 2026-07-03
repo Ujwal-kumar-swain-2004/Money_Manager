@@ -1,3 +1,4 @@
+$env:SPRING_PROFILES_ACTIVE = "local"
 $env:DB_URL = "jdbc:postgresql://localhost:5439/moneymanager"
 $env:DB_USERNAME = "postgres"
 $env:DB_PASSWORD = "postgres"

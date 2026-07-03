@@ -7,6 +7,8 @@ import {useNavigate} from "react-router-dom";
 const Sidebar = ({activeMenu}) => {
     const {user} = useContext(AppContext);
     const navigate = useNavigate();
+    const isPro = user?.planType === "PRO";
+    const menuItems = SIDE_BAR_DATA.filter((item) => !item.proOnly || isPro);
     return (
         <div className="w-64 h-[calc(100vh-61px)] bg-[#1f2a24] text-white border-r border-white/14 p-4 sticky top-[61px] z-20">
             <div className="flex flex-col items-center justify-center gap-3 mt-3 mb-7">
@@ -17,7 +19,7 @@ const Sidebar = ({activeMenu}) => {
                 )}
                 <h5 className="text-white font-medium leading-6">{user.fullName || ""}</h5>
             </div>
-            {SIDE_BAR_DATA.map((item, index) => (
+            {menuItems.map((item, index) => (
                 <button
                     onClick={() => navigate(item.path)}
                     key={`menu_${index}`}

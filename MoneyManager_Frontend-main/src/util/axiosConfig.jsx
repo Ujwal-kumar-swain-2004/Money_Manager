@@ -24,7 +24,7 @@ axiosConfig.interceptors.response.use(
     },
     (error) => {
         if (error.response && error.response.status === 401) {
-            // Token might be expired or invalid
+           
             localStorage.removeItem('token');
             window.location.href = '/login';
         }

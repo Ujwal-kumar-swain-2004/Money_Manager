@@ -2,43 +2,33 @@ import Dashboard from "../components/Dashboard.jsx";
 import {useUser} from "../hooks/useUser.jsx";
 import {Plus} from "lucide-react";
 import CategoryList from "../components/CategoryList.jsx";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import toast from "react-hot-toast";
 import Modal from "../components/Modal.jsx";
 import AddCategoryForm from "../components/AddCategoryForm.jsx";
 import PageHeader from "../components/PageHeader.jsx";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const Category = () => {
     useUser();
-    const [loading, setLoading] = useState(false);
-    const [categoryData, setCategoryData] = useState([]);
+    const queryClient = useQueryClient();
     const [openAddCategoryModal, setOpenAddCategoryModal] = useState(false);
     const [openEditCategoryModal, setOpenEditCategoryModal] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState(null);
 
-    const fetchCategoryDetails = async () => {
-        if (loading) return;
-
-        setLoading(true);
-
-        try {
-            // Debug: Check if token exists
-            const token = localStorage.getItem('token');
-            console.log('Token exists:', !!token);
-            console.log('Making request to:', API_ENDPOINTS.GET_ALL_CATEGORIES);
-            
+    const {data: categoryData = [], isLoading: loading} = useQuery({
+        queryKey: queryKeys.categories,
+        queryFn: async () => {
             const response = await axiosConfig.get(API_ENDPOINTS.GET_ALL_CATEGORIES);
-            if (response.status === 200) {
-                console.log('categories', response.data);
-                setCategoryData(response.data);
-            }
-        } catch(error) {
+            return response.data || [];
+        },
+        staleTime: cacheTimes.categories,
+        gcTime: cacheTimes.categories * 2,
+        onError: (error) => {
             console.error('Full error:', error);
-            console.error('Error status:', error.response?.status);
-            console.error('Error data:', error.response?.data);
-            
             if (error.response?.status === 401) {
                 toast.error("Authentication failed. Please login again.");
                 localStorage.removeItem('token');
@@ -46,14 +36,8 @@ const Category = () => {
             } else {
                 toast.error(error.response?.data?.message || error.message || 'Failed to fetch categories');
             }
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    useEffect(() => {
-        fetchCategoryDetails();
-    }, []);
+        },
+    });
 
     const handleAddCategory = async (category) => {
         const {name, type, icon} = category;
@@ -76,7 +60,7 @@ const Category = () => {
             if (response.status === 201) {
                 toast.success("Category added successfully");
                 setOpenAddCategoryModal(false);
-                fetchCategoryDetails();
+                queryClient.invalidateQueries({queryKey: queryKeys.categories});
             }
         } catch (error) {
             console.error('Error adding category:', error);
@@ -112,7 +96,7 @@ const Category = () => {
             setOpenEditCategoryModal(false);
             setSelectedCategory(null);
             toast.success("Category updated successfully");
-            fetchCategoryDetails();
+            queryClient.invalidateQueries({queryKey: queryKeys.categories});
         } catch(error) {
             console.error('Error updating category:', error.response?.data?.message || error.message);
             if (error.response?.status === 401) {

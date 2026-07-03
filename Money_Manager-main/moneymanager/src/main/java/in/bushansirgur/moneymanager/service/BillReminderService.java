@@ -18,6 +18,7 @@ public class BillReminderService {
     @Autowired private BillReminderRepository billReminderRepository;
     @Autowired private CategoryRepository categoryRepository;
     @Autowired private ProfileService profileService;
+    @Autowired private CacheInvalidationService cacheInvalidationService;
 
     public BillReminderDTO save(BillReminderDTO dto) {
         ProfileEntity profile = profileService.getCurrentProfile();
@@ -36,7 +37,9 @@ public class BillReminderService {
         entity.setPaid(dto.getPaid());
         entity.setCategory(category);
         entity.setProfile(profile);
-        return toDTO(billReminderRepository.save(entity));
+        BillReminderDTO saved = toDTO(billReminderRepository.save(entity));
+        cacheInvalidationService.clearMoneyCaches();
+        return saved;
     }
 
     public List<BillReminderDTO> list() {
@@ -48,6 +51,7 @@ public class BillReminderService {
         ProfileEntity profile = profileService.getCurrentProfile();
         BillReminderEntity entity = billReminderRepository.findByIdAndProfileId(id, profile.getId()).orElseThrow(() -> new RuntimeException("Reminder not found"));
         billReminderRepository.delete(entity);
+        cacheInvalidationService.clearMoneyCaches();
     }
 
     public List<BillReminderDTO> upcoming(int days) {

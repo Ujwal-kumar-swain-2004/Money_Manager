@@ -1,72 +1,77 @@
 import Dashboard from "../components/Dashboard.jsx";
 import {useUser} from "../hooks/useUser.jsx";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import toast from "react-hot-toast";
 import IncomeList from "../components/IncomeList.jsx";
-import log from "eslint-plugin-react/lib/util/log.js";
 import Modal from "../components/Modal.jsx";
 import {Plus} from "lucide-react";
 import AddIncomeForm from "../components/AddIncomeForm.jsx";
 import DeleteAlert from "../components/DeleteAlert.jsx";
 import IncomeOverview from "../components/IncomeOverview.jsx";
 import PageHeader from "../components/PageHeader.jsx";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const Income = () => {
     useUser();
-    const [incomeData, setIncomeData] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [familyMembers, setFamilyMembers] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
 
     const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
     const [openDeleteAlert, setOpenDeleteAlert] = useState({
         show: false,
         data: null,
     });
-    const fetchIncomeDetails = async () => {
-        if (loading) return;
-
-        setLoading(true);
-
-        try {
+    const {data: incomeData = []} = useQuery({
+        queryKey: queryKeys.incomes,
+        queryFn: async () => {
             const response = await axiosConfig.get(API_ENDPOINTS.GET_ALL_INCOMES);
-            if (response.status === 200) {
-               setIncomeData(response.data);
-            }
-        }catch(error) {
+            return response.data || [];
+        },
+        staleTime: cacheTimes.transactions,
+        onError: (error) => {
             console.error('Failed to fetch income details:', error);
             toast.error(error.response?.data?.message || "Failed to fetch income details");
-        }finally {
-            setLoading(false);
-        }
-    }
+        },
+    });
 
-    const fetchIncomeCategories = async () => {
-        try {
+    const {data: categories = []} = useQuery({
+        queryKey: queryKeys.categoryType("income"),
+        queryFn: async () => {
             const response = await axiosConfig.get(API_ENDPOINTS.CATEGORY_BY_TYPE("income"));
-            if (response.status === 200) {
-                console.log('income categories', response.data);
-                setCategories(response.data);
-            }
-        }catch(error) {
-            console.log('Failed to fetch income categories:', error);
-            toast.error(error.data?.message || "Failed to fetch income categories");
-        }
-    }
+            return response.data || [];
+        },
+        staleTime: cacheTimes.categories,
+    });
 
-    const fetchFamilyMembers = async () => {
-        try {
+    const {data: families = []} = useQuery({
+        queryKey: queryKeys.families,
+        queryFn: async () => {
             const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
-            const family = response.data?.[0];
-            if (!family?.id) return;
-            const membersResponse = await axiosConfig.get(API_ENDPOINTS.FAMILY_MEMBERS(family.id));
-            setFamilyMembers(membersResponse.data || []);
-        } catch (error) {
-            console.log('Failed to fetch family members:', error);
-        }
-    }
+            return response.data || [];
+        },
+        staleTime: cacheTimes.family,
+    });
+
+    const familyId = families[0]?.id;
+    const {data: familyMembers = []} = useQuery({
+        queryKey: queryKeys.familyMembers(familyId),
+        enabled: !!familyId,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILY_MEMBERS(familyId));
+            return response.data || [];
+        },
+        staleTime: cacheTimes.family,
+    });
+
+    const invalidateIncomeCaches = () => {
+        queryClient.invalidateQueries({queryKey: queryKeys.incomes});
+        queryClient.invalidateQueries({queryKey: queryKeys.dashboard});
+        queryClient.invalidateQueries({queryKey: ["money-plan"]});
+        queryClient.invalidateQueries({queryKey: queryKeys.aiInsights});
+        if (familyId) queryClient.invalidateQueries({queryKey: queryKeys.familyDashboard(familyId)});
+    };
 
     const handleAddIncome = async (income) => {
         const {name, amount, date, icon, categoryId, paymentMethod, notes, tags, receiptUrl, familyMemberId} = income;
@@ -113,8 +118,7 @@ const Income = () => {
             if (response.status === 201) {
                 setOpenAddIncomeModal(false);
                 toast.success("Income added successfully");
-                fetchIncomeDetails();
-                fetchIncomeCategories();
+                invalidateIncomeCaches();
             }
         }catch(error){
             console.log('Error adding income', error);
@@ -128,7 +132,7 @@ const Income = () => {
             await axiosConfig.delete(API_ENDPOINTS.DELETE_INCOME(id));
             setOpenDeleteAlert({show: false, data: null});
             toast.success("Income deleted successfully");
-            fetchIncomeDetails();
+            invalidateIncomeCaches();
         }catch(error) {
             console.log('Error deleting income', error);
             toast.error(error.response?.data?.message || "Failed to delete income");
@@ -165,12 +169,6 @@ const Income = () => {
             toast.error(error.response?.data?.message || "Failed to email income");
         }
     }
-
-    useEffect(() => {
-        fetchIncomeDetails();
-        fetchIncomeCategories()
-        fetchFamilyMembers();
-    }, []);
 
     return (
         <Dashboard activeMenu="Income">

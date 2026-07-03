@@ -1,11 +1,13 @@
 package in.bushansirgur.moneymanager.service;
 
 import in.bushansirgur.moneymanager.dto.CategoryDTO;
+import in.bushansirgur.moneymanager.config.RedisCacheConfig;
 import in.bushansirgur.moneymanager.entity.CategoryEntity;
 import in.bushansirgur.moneymanager.entity.ProfileEntity;
 import in.bushansirgur.moneymanager.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -20,6 +22,9 @@ public class CategoryService {
     private  ProfileService profileService;
     @Autowired
     private  CategoryRepository categoryRepository;
+    @Autowired
+    private CacheInvalidationService cacheInvalidationService;
+
     public CategoryDTO saveCategory(CategoryDTO categoryDTO) {
         ProfileEntity profile = profileService.getCurrentProfile();
         if (categoryRepository.existsByNameAndProfileId(categoryDTO.getName(), profile.getId())) {
@@ -28,14 +33,18 @@ public class CategoryService {
 
         CategoryEntity newCategory = toEntity(categoryDTO, profile);
         newCategory = categoryRepository.save(newCategory);
+        cacheInvalidationService.clearCategoryCaches();
         return toDTO(newCategory);
     }
 
+    @Cacheable(value = RedisCacheConfig.CATEGORIES_CACHE, key = "@profileService.getCurrentProfileId() + ':all'")
     public List<CategoryDTO> getCategoriesForCurrentUser() {
         ProfileEntity profile = profileService.getCurrentProfile();
         List<CategoryEntity> categories = categoryRepository.findByProfileId(profile.getId());
         return categories.stream().map(this::toDTO).toList();
     }
+
+    @Cacheable(value = RedisCacheConfig.CATEGORIES_CACHE, key = "@profileService.getCurrentProfileId() + ':type:' + #type")
     public List<CategoryDTO> getCategoriesByTypeForCurrentUser(String type) {
         ProfileEntity profile = profileService.getCurrentProfile();
         List<CategoryEntity> entities = categoryRepository.findByTypeAndProfileId(type, profile.getId());
@@ -49,6 +58,7 @@ public class CategoryService {
         existingCategory.setName(dto.getName());
         existingCategory.setIcon(dto.getIcon());
         existingCategory = categoryRepository.save(existingCategory);
+        cacheInvalidationService.clearCategoryCaches();
         return toDTO(existingCategory);
     }
     private CategoryEntity toEntity(CategoryDTO categoryDTO, ProfileEntity profile) {

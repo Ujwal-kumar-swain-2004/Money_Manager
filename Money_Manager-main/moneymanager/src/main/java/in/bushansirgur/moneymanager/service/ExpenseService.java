@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ExpenseService {
     @Autowired
     private  CategoryRepository categoryRepository;
@@ -28,12 +30,16 @@ public class ExpenseService {
     private FamilyMemberRepository familyMemberRepository;
     @Autowired
     private  ProfileService profileService;
+    @Autowired
+    private CacheInvalidationService cacheInvalidationService;
+
     public ExpenseDTO addExpense(ExpenseDTO dto) {
         ProfileEntity profile = profileService.getCurrentProfile();
         CategoryEntity category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new RuntimeException("Category not found"));
         ExpenseEntity newExpense = toEntity(dto, profile, category);
         newExpense = expenseRepository.save(newExpense);
+        cacheInvalidationService.clearMoneyCaches();
         return toDTO(newExpense);
     }
     public List<ExpenseDTO> getCurrentMonthExpensesForCurrentUser() {
@@ -52,6 +58,7 @@ public class ExpenseService {
             throw new RuntimeException("Unauthorized to delete this expense");
         }
         expenseRepository.delete(entity);
+        cacheInvalidationService.clearMoneyCaches();
     }
     public List<ExpenseDTO> getLatest5ExpensesForCurrentUser() {
         ProfileEntity profile = profileService.getCurrentProfile();

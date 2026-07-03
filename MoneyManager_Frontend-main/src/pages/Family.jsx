@@ -6,47 +6,52 @@ import PageHeader from "../components/PageHeader.jsx";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import {useUser} from "../hooks/useUser.jsx";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const currency = (value) => `₹${Number(value || 0).toLocaleString("en-IN")}`;
 const today = new Date().toISOString().split("T")[0];
 
 const Family = () => {
     useUser();
-    const [families, setFamilies] = useState([]);
+    const queryClient = useQueryClient();
     const [activeFamilyId, setActiveFamilyId] = useState("");
-    const [dashboard, setDashboard] = useState(null);
     const [familyName, setFamilyName] = useState("My Family");
     const [memberForm, setMemberForm] = useState({name: "", role: "Child", monthlyAllowance: ""});
     const [transferForm, setTransferForm] = useState({fromMemberId: "", toMemberId: "", amount: "", transferDate: today, note: ""});
-    const [loading, setLoading] = useState(false);
+    const [activeView, setActiveView] = useState("overview");
+
+    const {data: families = []} = useQuery({
+        queryKey: queryKeys.families,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
+            return response.data || [];
+        },
+        staleTime: cacheTimes.family,
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to load families"),
+    });
+
+    const {data: dashboard = null, isLoading: loading, refetch: refetchDashboard} = useQuery({
+        queryKey: queryKeys.familyDashboard(activeFamilyId),
+        enabled: !!activeFamilyId,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILY_DASHBOARD(activeFamilyId));
+            return response.data;
+        },
+        staleTime: cacheTimes.family,
+        onError: (error) => toast.error(error.response?.data?.message || "Failed to load family dashboard"),
+    });
 
     const members = useMemo(() => dashboard?.members || [], [dashboard]);
     const transfers = dashboard?.transfers || [];
 
-    const loadFamilies = async () => {
-        try {
-            const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
-            const list = response.data || [];
-            setFamilies(list);
-            if (list.length > 0) {
-                setActiveFamilyId((current) => current || list[0].id);
-            }
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load families");
+    const invalidateFamilyCaches = (familyId = activeFamilyId) => {
+        queryClient.invalidateQueries({queryKey: queryKeys.families});
+        if (familyId) {
+            queryClient.invalidateQueries({queryKey: queryKeys.familyDashboard(familyId)});
+            queryClient.invalidateQueries({queryKey: queryKeys.familyMembers(familyId)});
         }
-    };
-
-    const loadDashboard = async (familyId = activeFamilyId) => {
-        if (!familyId) return;
-        try {
-            setLoading(true);
-            const response = await axiosConfig.get(API_ENDPOINTS.FAMILY_DASHBOARD(familyId));
-            setDashboard(response.data);
-        } catch (error) {
-            toast.error(error.response?.data?.message || "Failed to load family dashboard");
-        } finally {
-            setLoading(false);
-        }
+        queryClient.invalidateQueries({queryKey: queryKeys.dashboard});
     };
 
     const createFamily = async () => {
@@ -56,9 +61,9 @@ const Family = () => {
         }
         try {
             const response = await axiosConfig.post(API_ENDPOINTS.FAMILIES, {name: familyName});
-            setFamilies([response.data]);
             setActiveFamilyId(response.data.id);
-            setDashboard(response.data);
+            queryClient.setQueryData(queryKeys.familyDashboard(response.data.id), response.data);
+            invalidateFamilyCaches(response.data.id);
             toast.success("Family space created");
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to create family");
@@ -76,7 +81,7 @@ const Family = () => {
                 monthlyAllowance: Number(memberForm.monthlyAllowance || 0),
             });
             setMemberForm({name: "", role: "Child", monthlyAllowance: ""});
-            await loadDashboard();
+            invalidateFamilyCaches();
             toast.success("Family member added");
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to add member");
@@ -95,7 +100,7 @@ const Family = () => {
                 amount: Number(transferForm.amount),
             });
             setTransferForm({fromMemberId: "", toMemberId: "", amount: "", transferDate: today, note: ""});
-            await loadDashboard();
+            invalidateFamilyCaches();
             toast.success("Money transfer recorded");
         } catch (error) {
             toast.error(error.response?.data?.message || "Failed to record transfer");
@@ -103,12 +108,10 @@ const Family = () => {
     };
 
     useEffect(() => {
-        loadFamilies();
-    }, []);
-
-    useEffect(() => {
-        loadDashboard(activeFamilyId);
-    }, [activeFamilyId]);
+        if (families.length > 0) {
+            setActiveFamilyId((current) => current || families[0].id);
+        }
+    }, [families]);
 
     useEffect(() => {
         if (members.length > 0 && !transferForm.toMemberId) {
@@ -123,7 +126,7 @@ const Family = () => {
                     eyebrow="Household ledger"
                     title="Family Money"
                     description="Maintain allowances, family transfers, child spending, shared bills, and who used the money."
-                    action={<button onClick={() => loadDashboard()} className="add-btn"><RefreshCcw size={16} /> Refresh</button>}
+                    action={<button onClick={() => refetchDashboard()} className="add-btn"><RefreshCcw size={16} /> Refresh</button>}
                 />
 
                 {families.length === 0 ? (
@@ -162,7 +165,19 @@ const Family = () => {
                                     <SummaryCard icon={ArrowRightLeft} label="Net balance" value={currency(dashboard?.totalBalance)} />
                                 </div>
                             </div>
+                        </section>
 
+                        <ViewTabs
+                            tabs={[
+                                {id: "overview", label: "Overview"},
+                                {id: "members", label: "Members"},
+                                {id: "transfers", label: "Transfers"},
+                            ]}
+                            active={activeView}
+                            onChange={setActiveView}
+                        />
+
+                        {activeView === "members" && <section className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
                             <div className="rounded-lg border border-white/14 bg-[#131c17] p-5">
                                 <h3 className="flex items-center gap-2 text-lg font-bold text-white"><UserPlus size={18} /> Add member</h3>
                                 <div className="mt-4 grid gap-3">
@@ -179,9 +194,11 @@ const Family = () => {
                                     <button className="add-btn add-btn-fill" onClick={addMember}><Plus size={16} /> Add Member</button>
                                 </div>
                             </div>
-                        </section>
 
-                        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            <div className="rounded-lg border border-white/14 bg-[#1f2a24] p-5 text-white">
+                                <h3 className="text-lg font-bold">Member allowance cards</h3>
+                                <p className="mt-1 text-sm text-white/62">A clean card view of who received money, who spent it, and what is left.</p>
+                                <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                             {members.map((member) => (
                                 <div key={member.id} className="rounded-lg border border-white/14 bg-[#111a15] p-5 text-white">
                                     <div className="flex items-center justify-between">
@@ -201,10 +218,34 @@ const Family = () => {
                                     </div>
                                 </div>
                             ))}
-                            {!loading && members.length === 0 && <p className="text-white/72">Add members to start tracking family spending.</p>}
-                        </section>
+                                    {!loading && members.length === 0 && <p className="text-white/72">Add members to start tracking family spending.</p>}
+                                </div>
+                            </div>
+                        </section>}
 
-                        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+                        {activeView === "overview" && <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            {members.map((member) => (
+                                <div key={member.id} className="rounded-lg border border-white/14 bg-[#111a15] p-5 text-white">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-white/68">{member.role}</p>
+                                            <h3 className="text-xl font-bold">{member.name}</h3>
+                                        </div>
+                                        <div className="grid h-10 w-10 place-items-center rounded-md bg-white/10">
+                                            <UsersRound size={18} />
+                                        </div>
+                                    </div>
+                                    <div className="mt-5 space-y-3 text-sm">
+                                        <Bar label="Received" value={currency(member.monthReceived)} />
+                                        <Bar label="Spent" value={currency(member.monthSpent)} danger />
+                                        <Bar label="Remaining" value={currency(member.allowanceRemaining)} highlight />
+                                    </div>
+                                </div>
+                            ))}
+                            {!loading && members.length === 0 && <p className="text-white/72">Add members to start tracking family spending.</p>}
+                        </section>}
+
+                        {activeView === "transfers" && <section className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
                             <div className="rounded-lg border border-white/14 bg-[#131c17] p-5">
                                 <h3 className="text-lg font-bold text-white">Record family transfer</h3>
                                 <div className="mt-4 grid gap-3">
@@ -239,7 +280,7 @@ const Family = () => {
                                     {transfers.length === 0 && <p className="py-5 text-sm text-white/68">No family transfers recorded yet.</p>}
                                 </div>
                             </div>
-                        </section>
+                        </section>}
                     </>
                 )}
             </div>
@@ -259,6 +300,23 @@ const Bar = ({label, value, danger, highlight}) => (
     <div className="flex items-center justify-between">
         <span className="text-white/65">{label}</span>
         <span className={`${danger ? "text-red-300" : highlight ? "text-[#d9ff72]" : "text-white"} font-bold`}>{value}</span>
+    </div>
+);
+
+const ViewTabs = ({tabs, active, onChange}) => (
+    <div className="sticky top-[76px] z-10 rounded-lg border border-white/14 bg-[#172119]/95 p-1.5 shadow-xl shadow-black/20 backdrop-blur">
+        <div className="grid gap-1 sm:grid-cols-3">
+            {tabs.map((tab) => (
+                <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => onChange(tab.id)}
+                    className={`rounded-md px-3 py-2.5 text-sm font-semibold transition ${active === tab.id ? "bg-[#d9ff72] text-[#1f2a24]" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
+                >
+                    {tab.label}
+                </button>
+            ))}
+        </div>
     </div>
 );
 

@@ -1,0 +1,6 @@
+# Local secrets and environment overrides
+.env
+.env.*
+!.env.example
+*.local.ps1
+*.log

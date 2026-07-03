@@ -1,5 +1,4 @@
-import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import toast from "react-hot-toast";
 import {useUser} from "../hooks/useUser.jsx";
 import axiosConfig from "../util/axiosConfig.jsx";
@@ -12,65 +11,66 @@ import AddExpenseForm from "../components/AddExpenseForm.jsx";
 import DeleteAlert from "../components/DeleteAlert.jsx";
 import PageHeader from "../components/PageHeader.jsx";
 import {Plus} from "lucide-react";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const Expense = () => {
     useUser();
-    const navigate = useNavigate();
-    const [expenseData, setExpenseData] = useState([]);
-    const [categories, setCategories] = useState([]);
-    const [familyMembers, setFamilyMembers] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const queryClient = useQueryClient();
     const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
     const [openDeleteAlert, setOpenDeleteAlert] = useState({
         show: false,
         data: null,
     });
 
-    const fetchExpenseDetails = async () => {
-        if (loading) return; 
-
-        setLoading(true);
-
-        try {
-            const response = await axiosConfig.get(
-                `${API_ENDPOINTS.GET_ALL_EXPENSE}`
-            );
-
-            if (response.data) {
-                setExpenseData(response.data);
-            }
-        } catch (error) {
+    const {data: expenseData = []} = useQuery({
+        queryKey: queryKeys.expenses,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.GET_ALL_EXPENSE);
+            return response.data || [];
+        },
+        staleTime: cacheTimes.transactions,
+        onError: (error) => {
             console.error("Failed to fetch expense details:", error);
             toast.error("Failed to fetch expense details.");
-        } finally {
-            setLoading(false);
-        }
-    };
+        },
+    });
 
-    const fetchExpenseCategories = async () => {
-        try {
-            const response = await axiosConfig.get(
-                API_ENDPOINTS.CATEGORY_BY_TYPE("expense") 
-            );
-            if (response.data) {
-                setCategories(response.data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch expense categories:", error);
-            toast.error("Failed to fetch expense categories.");
-        }
-    };
+    const {data: categories = []} = useQuery({
+        queryKey: queryKeys.categoryType("expense"),
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.CATEGORY_BY_TYPE("expense"));
+            return response.data || [];
+        },
+        staleTime: cacheTimes.categories,
+    });
 
-    const fetchFamilyMembers = async () => {
-        try {
+    const {data: families = []} = useQuery({
+        queryKey: queryKeys.families,
+        queryFn: async () => {
             const response = await axiosConfig.get(API_ENDPOINTS.FAMILIES);
-            const family = response.data?.[0];
-            if (!family?.id) return;
-            const membersResponse = await axiosConfig.get(API_ENDPOINTS.FAMILY_MEMBERS(family.id));
-            setFamilyMembers(membersResponse.data || []);
-        } catch (error) {
-            console.log("Failed to fetch family members:", error);
-        }
+            return response.data || [];
+        },
+        staleTime: cacheTimes.family,
+    });
+
+    const familyId = families[0]?.id;
+    const {data: familyMembers = []} = useQuery({
+        queryKey: queryKeys.familyMembers(familyId),
+        enabled: !!familyId,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.FAMILY_MEMBERS(familyId));
+            return response.data || [];
+        },
+        staleTime: cacheTimes.family,
+    });
+
+    const invalidateExpenseCaches = () => {
+        queryClient.invalidateQueries({queryKey: queryKeys.expenses});
+        queryClient.invalidateQueries({queryKey: queryKeys.dashboard});
+        queryClient.invalidateQueries({queryKey: ["money-plan"]});
+        queryClient.invalidateQueries({queryKey: queryKeys.aiInsights});
+        if (familyId) queryClient.invalidateQueries({queryKey: queryKeys.familyDashboard(familyId)});
     };
 
     const handleAddExpense = async (expense) => {
@@ -118,8 +118,7 @@ const Expense = () => {
 
             setOpenAddExpenseModal(false);
             toast.success("Expense added successfully");
-            fetchExpenseDetails(); 
-            fetchExpenseCategories();
+            invalidateExpenseCaches();
         } catch (error) {
             console.error(
                 "Error adding expense:",
@@ -135,7 +134,7 @@ const Expense = () => {
 
             setOpenDeleteAlert({ show: false, data: null });
             toast.success("Expense details deleted successfully");
-            fetchExpenseDetails();
+            invalidateExpenseCaches();
         } catch (error) {
             console.error(
                 "Error deleting expense:",
@@ -183,12 +182,6 @@ const Expense = () => {
             toast.error("Failed to email expense details. Please try again.");
         }
     }
-
-    useEffect(() => {
-        fetchExpenseDetails();
-        fetchExpenseCategories(); 
-        fetchFamilyMembers();
-    }, []);
 
     return (
         <Dashboard activeMenu="Expense">

@@ -1,5 +1,6 @@
-import {useEffect, useMemo, useState} from "react";
+import {useMemo, useState} from "react";
 import toast from "react-hot-toast";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
 import {Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis} from "recharts";
 import {CalendarDays, CreditCard, IndianRupee, Landmark, Plus, Repeat2, Target, Trash2, WalletCards} from "lucide-react";
 import Dashboard from "../components/Dashboard.jsx";
@@ -7,6 +8,7 @@ import {useUser} from "../hooks/useUser.jsx";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
 import {addThousandsSeparator} from "../util/util.js";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const paymentMethods = ["cash", "UPI", "card", "bank"];
 const colors = ["#d9ff72", "#86efac", "#38bdf8", "#fbbf24", "#fb7185", "#a78bfa"];
@@ -19,28 +21,20 @@ const emptyContribution = {goalId: "", amount: "", contributionDate: new Date().
 
 const MoneyPlan = () => {
     useUser();
-    const [categories, setCategories] = useState([]);
-    const [budgets, setBudgets] = useState([]);
-    const [goals, setGoals] = useState([]);
-    const [recurring, setRecurring] = useState([]);
-    const [analytics, setAnalytics] = useState(null);
-    const [summary, setSummary] = useState(null);
-    const [reminders, setReminders] = useState([]);
+    const queryClient = useQueryClient();
     const [contributions, setContributions] = useState([]);
     const [budgetForm, setBudgetForm] = useState(emptyBudget);
     const [goalForm, setGoalForm] = useState(emptyGoal);
     const [recurringForm, setRecurringForm] = useState(emptyRecurring);
     const [reminderForm, setReminderForm] = useState(emptyReminder);
     const [contributionForm, setContributionForm] = useState(emptyContribution);
-    const [loading, setLoading] = useState(false);
-
-    const expenseCategories = useMemo(() => categories.filter((category) => category.type === "expense"), [categories]);
+    const [activeView, setActiveView] = useState("overview");
     const selectedMonth = Number(budgetForm.month);
     const selectedYear = Number(budgetForm.year);
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
+    const {data: planData = {}, isLoading: loading, refetch: loadData} = useQuery({
+        queryKey: queryKeys.moneyPlan(selectedMonth, selectedYear),
+        queryFn: async () => {
             const [categoryRes, budgetRes, goalRes, recurringRes, analyticsRes, summaryRes, reminderRes] = await Promise.all([
                 axiosConfig.get(API_ENDPOINTS.GET_ALL_CATEGORIES),
                 axiosConfig.get(API_ENDPOINTS.BUDGETS, {params: {month: selectedMonth, year: selectedYear}}),
@@ -50,24 +44,37 @@ const MoneyPlan = () => {
                 axiosConfig.get(API_ENDPOINTS.MONEY_PLAN_SUMMARY, {params: {month: selectedMonth, year: selectedYear, forecastDays: 30}}),
                 axiosConfig.get(API_ENDPOINTS.BILL_REMINDERS),
             ]);
-            setCategories(categoryRes.data || []);
-            setBudgets(budgetRes.data || []);
-            setGoals(goalRes.data || []);
-            setRecurring(recurringRes.data || []);
-            setAnalytics(analyticsRes.data || null);
-            setSummary(summaryRes.data || null);
-            setReminders(reminderRes.data || []);
-        } catch (error) {
+            return {
+                categories: categoryRes.data || [],
+                budgets: budgetRes.data || [],
+                goals: goalRes.data || [],
+                recurring: recurringRes.data || [],
+                analytics: analyticsRes.data || null,
+                summary: summaryRes.data || null,
+                reminders: reminderRes.data || [],
+            };
+        },
+        staleTime: cacheTimes.moneyPlan,
+        onError: (error) => {
             console.error("Failed to load money plan:", error);
             toast.error("Failed to load money plan");
-        } finally {
-            setLoading(false);
-        }
-    };
+        },
+    });
 
-    useEffect(() => {
-        loadData();
-    }, [selectedMonth, selectedYear]);
+    const categories = planData.categories || [];
+    const budgets = planData.budgets || [];
+    const goals = planData.goals || [];
+    const recurring = planData.recurring || [];
+    const analytics = planData.analytics || null;
+    const summary = planData.summary || null;
+    const reminders = planData.reminders || [];
+    const expenseCategories = useMemo(() => categories.filter((category) => category.type === "expense"), [categories]);
+
+    const invalidateMoneyPlanCaches = () => {
+        queryClient.invalidateQueries({queryKey: queryKeys.moneyPlan(selectedMonth, selectedYear)});
+        queryClient.invalidateQueries({queryKey: queryKeys.dashboard});
+        queryClient.invalidateQueries({queryKey: queryKeys.aiInsights});
+    };
 
     const saveBudget = async (event) => {
         event.preventDefault();
@@ -75,7 +82,7 @@ const MoneyPlan = () => {
         await axiosConfig.post(API_ENDPOINTS.BUDGETS, {...budgetForm, amount: Number(budgetForm.amount)});
         setBudgetForm(emptyBudget);
         toast.success("Budget saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveGoal = async (event) => {
@@ -88,7 +95,7 @@ const MoneyPlan = () => {
         });
         setGoalForm(emptyGoal);
         toast.success("Goal saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveRecurring = async (event) => {
@@ -101,7 +108,7 @@ const MoneyPlan = () => {
         });
         setRecurringForm(emptyRecurring);
         toast.success("Recurring item saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveReminder = async (event) => {
@@ -110,7 +117,7 @@ const MoneyPlan = () => {
         await axiosConfig.post(API_ENDPOINTS.BILL_REMINDERS, {...reminderForm, amount: Number(reminderForm.amount), categoryId: reminderForm.categoryId || null});
         setReminderForm(emptyReminder);
         toast.success("Reminder saved");
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const saveContribution = async (event) => {
@@ -119,7 +126,7 @@ const MoneyPlan = () => {
         await axiosConfig.post(API_ENDPOINTS.GOAL_CONTRIBUTIONS(contributionForm.goalId), {...contributionForm, amount: Number(contributionForm.amount)});
         setContributionForm(emptyContribution);
         toast.success("Contribution added");
-        loadData();
+        invalidateMoneyPlanCaches();
         loadContributions(contributionForm.goalId);
     };
 
@@ -135,13 +142,13 @@ const MoneyPlan = () => {
     const processRecurringDue = async () => {
         const response = await axiosConfig.post(API_ENDPOINTS.PROCESS_RECURRING_DUE);
         toast.success(`${response.data?.length || 0} due recurring item(s) created`);
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const remove = async (endpoint, id, message) => {
         await axiosConfig.delete(`${endpoint}/${id}`);
         toast.success(message);
-        loadData();
+        invalidateMoneyPlanCaches();
     };
 
     const calendarMap = new Map((analytics?.calendarSpend || []).map((item) => [item.date, Number(item.amount)]));
@@ -209,7 +216,17 @@ const MoneyPlan = () => {
                         </Panel>
                     </section>
 
-                    <section className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+                    <ViewTabs
+                        tabs={[
+                            {id: "overview", label: "Overview"},
+                            {id: "plan", label: "Plan items"},
+                            {id: "calendar", label: "Calendar"},
+                        ]}
+                        active={activeView}
+                        onChange={setActiveView}
+                    />
+
+                    {activeView === "plan" && <section className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
                         <div className="rounded-xl border border-white/14 bg-[#18231d] p-4">
                             <div className="mb-4 flex items-center justify-between">
                                 <div>
@@ -341,9 +358,9 @@ const MoneyPlan = () => {
                                 </div>
                             </Panel>
                         </div>
-                    </section>
+                    </section>}
 
-                    <section className="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr_0.9fr]">
+                    {activeView === "overview" && <section className="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr_0.9fr]">
                         <Panel title="Budget Progress" action={loading ? "Loading" : `${budgets.length} active`}>
                             <div className="space-y-4">
                                 {budgets.map((budget) => <ProgressRow key={budget.id} icon={budget.categoryIcon} title={budget.categoryName} subtitle={`Spent Rs ${addThousandsSeparator(budget.spent || 0)} of Rs ${addThousandsSeparator(budget.amount || 0)}`} percent={budget.usagePercent || 0} onDelete={() => remove(API_ENDPOINTS.BUDGETS, budget.id, "Budget deleted")} />)}
@@ -376,9 +393,9 @@ const MoneyPlan = () => {
                                 {recurring.length === 0 && <EmptyState text="No recurring rules yet." />}
                             </div>
                         </Panel>
-                    </section>
+                    </section>}
 
-                    <section className="mt-4 grid gap-4 xl:grid-cols-2">
+                    {activeView === "plan" && <section className="mt-4 grid gap-4 xl:grid-cols-2">
                         <Panel title="Bills & Subscriptions" action={`${reminders.length} reminders`}>
                             <div className="space-y-2">
                                 {reminders.map((item) => (
@@ -408,9 +425,9 @@ const MoneyPlan = () => {
                                 {contributions.length === 0 && <EmptyState text="Select a goal to view contribution history." />}
                             </div>
                         </Panel>
-                    </section>
+                    </section>}
 
-                    <section className="mt-4">
+                    {activeView === "calendar" && <section className="mt-4">
                         <Panel title="Spending Calendar" action={`${selectedMonth}/${selectedYear}`}>
                             <div className="grid grid-cols-7 gap-1.5 md:gap-2">
                                 {calendarDays.map((day) => (
@@ -421,7 +438,7 @@ const MoneyPlan = () => {
                                 ))}
                             </div>
                         </Panel>
-                    </section>
+                    </section>}
                 </div>
             </div>
         </Dashboard>
@@ -467,6 +484,23 @@ const Panel = ({title, action, children}) => (
             <span className="rounded-md border border-white/14 bg-white/5 px-2.5 py-1 text-xs font-medium text-white/68">{action}</span>
         </div>
         {children}
+    </div>
+);
+
+const ViewTabs = ({tabs, active, onChange}) => (
+    <div className="sticky top-[76px] z-10 mt-4 rounded-lg border border-white/14 bg-[#172119]/95 p-1.5 shadow-xl shadow-black/20 backdrop-blur">
+        <div className="grid gap-1 sm:grid-cols-3">
+            {tabs.map((tab) => (
+                <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => onChange(tab.id)}
+                    className={`rounded-md px-3 py-2.5 text-sm font-semibold transition ${active === tab.id ? "bg-[#d9ff72] text-[#1f2a24]" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
+                >
+                    {tab.label}
+                </button>
+            ))}
+        </div>
     </div>
 );
 

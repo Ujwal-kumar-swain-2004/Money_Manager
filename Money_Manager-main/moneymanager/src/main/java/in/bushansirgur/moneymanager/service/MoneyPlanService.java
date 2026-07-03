@@ -2,12 +2,14 @@ package in.bushansirgur.moneymanager.service;
 
 import in.bushansirgur.moneymanager.dto.BudgetDTO;
 import in.bushansirgur.moneymanager.dto.MoneyPlanSummaryDTO;
+import in.bushansirgur.moneymanager.config.RedisCacheConfig;
 import in.bushansirgur.moneymanager.entity.BillReminderEntity;
 import in.bushansirgur.moneymanager.entity.ProfileEntity;
 import in.bushansirgur.moneymanager.entity.RecurringTransactionEntity;
 import in.bushansirgur.moneymanager.repository.BillReminderRepository;
 import in.bushansirgur.moneymanager.repository.RecurringTransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -24,6 +26,7 @@ public class MoneyPlanService {
     @Autowired private RecurringTransactionRepository recurringTransactionRepository;
     @Autowired private BillReminderRepository billReminderRepository;
 
+    @Cacheable(value = RedisCacheConfig.MONEY_PLAN_CACHE, key = "@profileService.getCurrentProfileId() + ':' + #month + ':' + #year + ':' + #forecastDays")
     public MoneyPlanSummaryDTO summary(Integer month, Integer year, Integer forecastDays) {
         MoneyPlanSummaryDTO dto = new MoneyPlanSummaryDTO();
         dto.setBudgetAlerts(buildBudgetAlerts(month, year));

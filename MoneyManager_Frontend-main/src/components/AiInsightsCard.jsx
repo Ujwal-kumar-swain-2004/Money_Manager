@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
 import axiosConfig from "../util/axiosConfig.jsx";
 import { API_ENDPOINTS } from "../util/apiEndpoints.js";
-import { TrendingUp, TrendingDown, Info, Loader2 } from "lucide-react";
+import { TrendingUp, TrendingDown, Info } from "lucide-react";
+import {useQuery} from "@tanstack/react-query";
+import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const typeConfig = {
     positive: {
@@ -39,26 +40,20 @@ const SkeletonCard = () => (
 );
 
 const AiInsightsCard = () => {
-    const [insights, setInsights] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const {data: insights = [], isLoading: loading, error} = useQuery({
+        queryKey: queryKeys.aiInsights,
+        queryFn: async () => {
+            const response = await axiosConfig.get(API_ENDPOINTS.AI_INSIGHTS, {timeout: 60000});
+            return response.data || [];
+        },
+        staleTime: cacheTimes.aiInsights,
+        gcTime: cacheTimes.aiInsights,
+        retry: false,
+    });
 
-    useEffect(() => {
-        const fetchInsights = async () => {
-            try {
-                const response = await axiosConfig.get(API_ENDPOINTS.AI_INSIGHTS, {
-                    timeout: 60000,
-                });
-                setInsights(response.data || []);
-            } catch (err) {
-                console.error("Failed to fetch AI insights:", err.response?.data || err.message);
-                setError("Could not load AI insights right now.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchInsights();
-    }, []);
+    if (error) {
+        console.error("Failed to fetch AI insights:", error.response?.data || error.message);
+    }
 
     return (
         <div className="card col-span-1 md:col-span-2">
@@ -86,7 +81,7 @@ const AiInsightsCard = () => {
 
             {error && (
                 <div className="text-center py-6 text-white/65 text-sm">
-                    <p>{error}</p>
+                    <p>Could not load AI insights right now.</p>
                 </div>
             )}
 
