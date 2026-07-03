@@ -61,6 +61,7 @@ public class ProfileService {
         entity.setEmail(profileDTO.getEmail());
         entity.setPassword(passwordEncoder.encode(profileDTO.getPassword()));
         entity.setProfileImageUrl(profileDTO.getProfileImageUrl());
+        entity.setPlanType(profileDTO.getPlanType() == null || profileDTO.getPlanType().isBlank() ? "FREE" : profileDTO.getPlanType());
         entity.setCreatedAt(profileDTO.getCreatedAt());
         entity.setUpdatedAt(profileDTO.getUpdatedAt());
         return entity;
@@ -73,6 +74,7 @@ public class ProfileService {
         dto.setFullName(profileEntity.getFullName());
         dto.setEmail(profileEntity.getEmail());
         dto.setProfileImageUrl(profileEntity.getProfileImageUrl());
+        dto.setPlanType(profileEntity.getPlanType() == null ? "FREE" : profileEntity.getPlanType());
         dto.setCreatedAt(profileEntity.getCreatedAt());
         dto.setUpdatedAt(profileEntity.getUpdatedAt());
         return dto;
@@ -119,6 +121,7 @@ public class ProfileService {
         dto.setFullName(currentUser.getFullName());
         dto.setEmail(currentUser.getEmail());
         dto.setProfileImageUrl(currentUser.getProfileImageUrl());
+        dto.setPlanType(currentUser.getPlanType() == null ? "FREE" : currentUser.getPlanType());
         dto.setCreatedAt(currentUser.getCreatedAt());
         dto.setUpdatedAt(currentUser.getUpdatedAt());
 

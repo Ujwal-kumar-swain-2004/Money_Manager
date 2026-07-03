@@ -133,7 +133,7 @@ const ProductShowcase = () => {
                         <PlanCard
                             title="Free"
                             price="Rs 0"
-                            items={["Personal dashboard", "Basic budgets", "Limited friends", "Limited AI insights"]}
+                            items={["Personal dashboard", "Basic budgets", "Limited friends", "Manual refresh"]}
                         />
                         <PlanCard
                             title="Pro"

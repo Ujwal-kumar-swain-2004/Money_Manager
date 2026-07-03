@@ -21,10 +21,21 @@ public class FriendGroupMemberEntity {
     @JoinColumn(name = "friend_id", nullable = false)
     private FriendEntity friend;
 
+    private String role;
+
+    @PrePersist
+    public void prePersist() {
+        if (role == null || role.isBlank()) {
+            role = "member";
+        }
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public FriendGroupEntity getGroup() { return group; }
     public void setGroup(FriendGroupEntity group) { this.group = group; }
     public FriendEntity getFriend() { return friend; }
     public void setFriend(FriendEntity friend) { this.friend = friend; }
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 }

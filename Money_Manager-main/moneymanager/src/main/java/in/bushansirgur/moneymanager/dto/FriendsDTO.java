@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public class FriendsDTO {
     private List<FriendDTO> friends;
@@ -12,6 +13,11 @@ public class FriendsDTO {
     private List<SettlementDTO> settlements;
     private List<ReminderDTO> reminders;
     private List<ActivityDTO> activities;
+    private List<RecurringSharedExpenseDTO> recurringExpenses;
+    private List<GroupReportDTO> groupReports;
+    private List<SettlementSuggestionDTO> settlementSuggestions;
+    private Map<String, Object> limits;
+    private String planType;
     private BigDecimal totalYouOwe;
     private BigDecimal totalOwedToYou;
     private BigDecimal netBalance;
@@ -28,6 +34,16 @@ public class FriendsDTO {
     public void setReminders(List<ReminderDTO> reminders) { this.reminders = reminders; }
     public List<ActivityDTO> getActivities() { return activities; }
     public void setActivities(List<ActivityDTO> activities) { this.activities = activities; }
+    public List<RecurringSharedExpenseDTO> getRecurringExpenses() { return recurringExpenses; }
+    public void setRecurringExpenses(List<RecurringSharedExpenseDTO> recurringExpenses) { this.recurringExpenses = recurringExpenses; }
+    public List<GroupReportDTO> getGroupReports() { return groupReports; }
+    public void setGroupReports(List<GroupReportDTO> groupReports) { this.groupReports = groupReports; }
+    public List<SettlementSuggestionDTO> getSettlementSuggestions() { return settlementSuggestions; }
+    public void setSettlementSuggestions(List<SettlementSuggestionDTO> settlementSuggestions) { this.settlementSuggestions = settlementSuggestions; }
+    public Map<String, Object> getLimits() { return limits; }
+    public void setLimits(Map<String, Object> limits) { this.limits = limits; }
+    public String getPlanType() { return planType; }
+    public void setPlanType(String planType) { this.planType = planType; }
     public BigDecimal getTotalYouOwe() { return totalYouOwe; }
     public void setTotalYouOwe(BigDecimal totalYouOwe) { this.totalYouOwe = totalYouOwe; }
     public BigDecimal getTotalOwedToYou() { return totalOwedToYou; }
@@ -44,6 +60,7 @@ public class FriendsDTO {
         public String upiId;
         public String status;
         public String inviteCode;
+        public String inviteLink;
         public BigDecimal balance;
     }
 
@@ -53,6 +70,13 @@ public class FriendsDTO {
         public String type;
         public String icon;
         public List<Long> friendIds;
+        public List<GroupMemberDTO> members;
+    }
+
+    public static class GroupMemberDTO {
+        public Long friendId;
+        public String friendName;
+        public String role;
     }
 
     public static class SplitDTO {
@@ -71,12 +95,50 @@ public class FriendsDTO {
         public String category;
         public String splitType;
         public String note;
+        public String receiptUrl;
         public Long paidByFriendId;
         public String paidByFriendName;
         public Long groupId;
         public String groupName;
         public List<SplitDTO> splits;
         public List<CommentDTO> comments;
+    }
+
+    public static class RecurringSharedExpenseDTO {
+        public Long id;
+        public String title;
+        public BigDecimal amount;
+        public String category;
+        public String splitType;
+        public String frequency;
+        public LocalDate nextDueDate;
+        public Boolean active;
+        public String note;
+        public String receiptUrl;
+        public Long paidByFriendId;
+        public String paidByFriendName;
+        public Long groupId;
+        public String groupName;
+    }
+
+    public static class GroupReportDTO {
+        public Long groupId;
+        public String groupName;
+        public BigDecimal totalSpent;
+        public BigDecimal settlementTotal;
+        public BigDecimal pendingBalance;
+        public Long expenseCount;
+        public Long memberCount;
+        public String topCategory;
+        public String topPayerName;
+    }
+
+    public static class SettlementSuggestionDTO {
+        public String fromName;
+        public String toName;
+        public Long friendId;
+        public BigDecimal amount;
+        public String note;
     }
 
     public static class SettlementDTO {

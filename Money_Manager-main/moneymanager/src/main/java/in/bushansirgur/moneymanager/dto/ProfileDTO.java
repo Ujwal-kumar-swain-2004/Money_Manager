@@ -10,6 +10,7 @@ public class ProfileDTO {
     private String email;
     private String password;
     private String profileImageUrl;
+    private String planType;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
@@ -51,6 +52,14 @@ public class ProfileDTO {
 
     public void setProfileImageUrl(String profileImageUrl) {
         this.profileImageUrl = profileImageUrl;
+    }
+
+    public String getPlanType() {
+        return planType;
+    }
+
+    public void setPlanType(String planType) {
+        this.planType = planType;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -9,6 +9,7 @@ import java.util.List;
 
 @Service
 public class CacheInvalidationService {
+
     private final CacheManager cacheManager;
 
     public CacheInvalidationService(CacheManager cacheManager) {
@@ -16,7 +17,10 @@ public class CacheInvalidationService {
     }
 
     public void clearMoneyCaches() {
-        clearCaches(List.of(RedisCacheConfig.DASHBOARD_CACHE, RedisCacheConfig.MONEY_PLAN_CACHE));
+        clearCaches(List.of(
+                RedisCacheConfig.DASHBOARD_CACHE,
+                RedisCacheConfig.MONEY_PLAN_CACHE
+        ));
     }
 
     public void clearCategoryCaches() {

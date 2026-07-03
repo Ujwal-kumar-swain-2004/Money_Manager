@@ -19,6 +19,7 @@ const Family = () => {
     const [familyName, setFamilyName] = useState("My Family");
     const [memberForm, setMemberForm] = useState({name: "", role: "Child", monthlyAllowance: ""});
     const [transferForm, setTransferForm] = useState({fromMemberId: "", toMemberId: "", amount: "", transferDate: today, note: ""});
+    const [activeView, setActiveView] = useState("overview");
 
     const {data: families = []} = useQuery({
         queryKey: queryKeys.families,
@@ -164,7 +165,19 @@ const Family = () => {
                                     <SummaryCard icon={ArrowRightLeft} label="Net balance" value={currency(dashboard?.totalBalance)} />
                                 </div>
                             </div>
+                        </section>
 
+                        <ViewTabs
+                            tabs={[
+                                {id: "overview", label: "Overview"},
+                                {id: "members", label: "Members"},
+                                {id: "transfers", label: "Transfers"},
+                            ]}
+                            active={activeView}
+                            onChange={setActiveView}
+                        />
+
+                        {activeView === "members" && <section className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
                             <div className="rounded-lg border border-white/14 bg-[#131c17] p-5">
                                 <h3 className="flex items-center gap-2 text-lg font-bold text-white"><UserPlus size={18} /> Add member</h3>
                                 <div className="mt-4 grid gap-3">
@@ -181,9 +194,11 @@ const Family = () => {
                                     <button className="add-btn add-btn-fill" onClick={addMember}><Plus size={16} /> Add Member</button>
                                 </div>
                             </div>
-                        </section>
 
-                        <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            <div className="rounded-lg border border-white/14 bg-[#1f2a24] p-5 text-white">
+                                <h3 className="text-lg font-bold">Member allowance cards</h3>
+                                <p className="mt-1 text-sm text-white/62">A clean card view of who received money, who spent it, and what is left.</p>
+                                <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2">
                             {members.map((member) => (
                                 <div key={member.id} className="rounded-lg border border-white/14 bg-[#111a15] p-5 text-white">
                                     <div className="flex items-center justify-between">
@@ -203,10 +218,34 @@ const Family = () => {
                                     </div>
                                 </div>
                             ))}
-                            {!loading && members.length === 0 && <p className="text-white/72">Add members to start tracking family spending.</p>}
-                        </section>
+                                    {!loading && members.length === 0 && <p className="text-white/72">Add members to start tracking family spending.</p>}
+                                </div>
+                            </div>
+                        </section>}
 
-                        <section className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+                        {activeView === "overview" && <section className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+                            {members.map((member) => (
+                                <div key={member.id} className="rounded-lg border border-white/14 bg-[#111a15] p-5 text-white">
+                                    <div className="flex items-center justify-between">
+                                        <div>
+                                            <p className="text-sm text-white/68">{member.role}</p>
+                                            <h3 className="text-xl font-bold">{member.name}</h3>
+                                        </div>
+                                        <div className="grid h-10 w-10 place-items-center rounded-md bg-white/10">
+                                            <UsersRound size={18} />
+                                        </div>
+                                    </div>
+                                    <div className="mt-5 space-y-3 text-sm">
+                                        <Bar label="Received" value={currency(member.monthReceived)} />
+                                        <Bar label="Spent" value={currency(member.monthSpent)} danger />
+                                        <Bar label="Remaining" value={currency(member.allowanceRemaining)} highlight />
+                                    </div>
+                                </div>
+                            ))}
+                            {!loading && members.length === 0 && <p className="text-white/72">Add members to start tracking family spending.</p>}
+                        </section>}
+
+                        {activeView === "transfers" && <section className="grid grid-cols-1 gap-4 lg:grid-cols-[0.9fr_1.1fr]">
                             <div className="rounded-lg border border-white/14 bg-[#131c17] p-5">
                                 <h3 className="text-lg font-bold text-white">Record family transfer</h3>
                                 <div className="mt-4 grid gap-3">
@@ -241,7 +280,7 @@ const Family = () => {
                                     {transfers.length === 0 && <p className="py-5 text-sm text-white/68">No family transfers recorded yet.</p>}
                                 </div>
                             </div>
-                        </section>
+                        </section>}
                     </>
                 )}
             </div>
@@ -261,6 +300,23 @@ const Bar = ({label, value, danger, highlight}) => (
     <div className="flex items-center justify-between">
         <span className="text-white/65">{label}</span>
         <span className={`${danger ? "text-red-300" : highlight ? "text-[#d9ff72]" : "text-white"} font-bold`}>{value}</span>
+    </div>
+);
+
+const ViewTabs = ({tabs, active, onChange}) => (
+    <div className="sticky top-[76px] z-10 rounded-lg border border-white/14 bg-[#172119]/95 p-1.5 shadow-xl shadow-black/20 backdrop-blur">
+        <div className="grid gap-1 sm:grid-cols-3">
+            {tabs.map((tab) => (
+                <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => onChange(tab.id)}
+                    className={`rounded-md px-3 py-2.5 text-sm font-semibold transition ${active === tab.id ? "bg-[#d9ff72] text-[#1f2a24]" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
+                >
+                    {tab.label}
+                </button>
+            ))}
+        </div>
     </div>
 );
 

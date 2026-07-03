@@ -28,11 +28,15 @@ public class ProfileEntity {
     private LocalDateTime updatedAt;
     private Boolean isActive;
     private String activationToken;
+    private String planType;
 
     @PrePersist
     public void prePersist() {
         if (this.isActive == null) {
             isActive = false;
+        }
+        if (this.planType == null || this.planType.isBlank()) {
+            planType = "FREE";
         }
     }
 
@@ -106,5 +110,13 @@ public class ProfileEntity {
 
     public void setActivationToken(String activationToken) {
         this.activationToken = activationToken;
+    }
+
+    public String getPlanType() {
+        return planType;
+    }
+
+    public void setPlanType(String planType) {
+        this.planType = planType;
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
 public interface SharedExpenseRepository extends JpaRepository<SharedExpenseEntity, Long> {
     @Query("""
@@ -19,4 +20,6 @@ public interface SharedExpenseRepository extends JpaRepository<SharedExpenseEnti
     List<SharedExpenseEntity> findByProfileIdOrderByExpenseDateDesc(@Param("profileId") Long profileId);
 
     Optional<SharedExpenseEntity> findByIdAndProfileId(Long id, Long profileId);
+    long countByProfileIdAndExpenseDateBetween(Long profileId, LocalDate startDate, LocalDate endDate);
+    List<SharedExpenseEntity> findByProfileIdAndGroupId(Long profileId, Long groupId);
 }

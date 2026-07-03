@@ -28,6 +28,7 @@ const MoneyPlan = () => {
     const [recurringForm, setRecurringForm] = useState(emptyRecurring);
     const [reminderForm, setReminderForm] = useState(emptyReminder);
     const [contributionForm, setContributionForm] = useState(emptyContribution);
+    const [activeView, setActiveView] = useState("overview");
     const selectedMonth = Number(budgetForm.month);
     const selectedYear = Number(budgetForm.year);
 
@@ -215,7 +216,17 @@ const MoneyPlan = () => {
                         </Panel>
                     </section>
 
-                    <section className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
+                    <ViewTabs
+                        tabs={[
+                            {id: "overview", label: "Overview"},
+                            {id: "plan", label: "Plan items"},
+                            {id: "calendar", label: "Calendar"},
+                        ]}
+                        active={activeView}
+                        onChange={setActiveView}
+                    />
+
+                    {activeView === "plan" && <section className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
                         <div className="rounded-xl border border-white/14 bg-[#18231d] p-4">
                             <div className="mb-4 flex items-center justify-between">
                                 <div>
@@ -347,9 +358,9 @@ const MoneyPlan = () => {
                                 </div>
                             </Panel>
                         </div>
-                    </section>
+                    </section>}
 
-                    <section className="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr_0.9fr]">
+                    {activeView === "overview" && <section className="mt-4 grid gap-4 xl:grid-cols-[1fr_1fr_0.9fr]">
                         <Panel title="Budget Progress" action={loading ? "Loading" : `${budgets.length} active`}>
                             <div className="space-y-4">
                                 {budgets.map((budget) => <ProgressRow key={budget.id} icon={budget.categoryIcon} title={budget.categoryName} subtitle={`Spent Rs ${addThousandsSeparator(budget.spent || 0)} of Rs ${addThousandsSeparator(budget.amount || 0)}`} percent={budget.usagePercent || 0} onDelete={() => remove(API_ENDPOINTS.BUDGETS, budget.id, "Budget deleted")} />)}
@@ -382,9 +393,9 @@ const MoneyPlan = () => {
                                 {recurring.length === 0 && <EmptyState text="No recurring rules yet." />}
                             </div>
                         </Panel>
-                    </section>
+                    </section>}
 
-                    <section className="mt-4 grid gap-4 xl:grid-cols-2">
+                    {activeView === "plan" && <section className="mt-4 grid gap-4 xl:grid-cols-2">
                         <Panel title="Bills & Subscriptions" action={`${reminders.length} reminders`}>
                             <div className="space-y-2">
                                 {reminders.map((item) => (
@@ -414,9 +425,9 @@ const MoneyPlan = () => {
                                 {contributions.length === 0 && <EmptyState text="Select a goal to view contribution history." />}
                             </div>
                         </Panel>
-                    </section>
+                    </section>}
 
-                    <section className="mt-4">
+                    {activeView === "calendar" && <section className="mt-4">
                         <Panel title="Spending Calendar" action={`${selectedMonth}/${selectedYear}`}>
                             <div className="grid grid-cols-7 gap-1.5 md:gap-2">
                                 {calendarDays.map((day) => (
@@ -427,7 +438,7 @@ const MoneyPlan = () => {
                                 ))}
                             </div>
                         </Panel>
-                    </section>
+                    </section>}
                 </div>
             </div>
         </Dashboard>
@@ -473,6 +484,23 @@ const Panel = ({title, action, children}) => (
             <span className="rounded-md border border-white/14 bg-white/5 px-2.5 py-1 text-xs font-medium text-white/68">{action}</span>
         </div>
         {children}
+    </div>
+);
+
+const ViewTabs = ({tabs, active, onChange}) => (
+    <div className="sticky top-[76px] z-10 mt-4 rounded-lg border border-white/14 bg-[#172119]/95 p-1.5 shadow-xl shadow-black/20 backdrop-blur">
+        <div className="grid gap-1 sm:grid-cols-3">
+            {tabs.map((tab) => (
+                <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => onChange(tab.id)}
+                    className={`rounded-md px-3 py-2.5 text-sm font-semibold transition ${active === tab.id ? "bg-[#d9ff72] text-[#1f2a24]" : "text-white/70 hover:bg-white/10 hover:text-white"}`}
+                >
+                    {tab.label}
+                </button>
+            ))}
+        </div>
     </div>
 );
 

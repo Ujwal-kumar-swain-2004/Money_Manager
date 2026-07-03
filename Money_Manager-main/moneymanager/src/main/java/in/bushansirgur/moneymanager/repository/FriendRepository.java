@@ -10,4 +10,5 @@ public interface FriendRepository extends JpaRepository<FriendEntity, Long> {
     List<FriendEntity> findByProfileIdOrderByNameAsc(Long profileId);
     Optional<FriendEntity> findByIdAndProfileId(Long id, Long profileId);
     Optional<FriendEntity> findByInviteCodeAndProfileId(String inviteCode, Long profileId);
+    long countByProfileId(Long profileId);
 }

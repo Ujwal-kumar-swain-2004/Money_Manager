@@ -25,6 +25,22 @@ public class FriendsController {
         return friendsService.addFriend(dto);
     }
 
+    @PostMapping("/invite")
+    @ResponseStatus(HttpStatus.CREATED)
+    public FriendsDTO.FriendDTO inviteFriend(@RequestBody FriendsDTO.FriendDTO dto) {
+        return friendsService.inviteFriend(dto);
+    }
+
+    @PostMapping("/invite/{inviteCode}/accept")
+    public FriendsDTO.FriendDTO acceptInvite(@PathVariable String inviteCode) {
+        return friendsService.acceptInvite(inviteCode);
+    }
+
+    @PostMapping("/invite/{inviteCode}/reject")
+    public FriendsDTO.FriendDTO rejectInvite(@PathVariable String inviteCode) {
+        return friendsService.rejectInvite(inviteCode);
+    }
+
     @PatchMapping("/{friendId}/status")
     public FriendsDTO.FriendDTO updateStatus(@PathVariable Long friendId, @RequestBody Map<String, String> body) {
         return friendsService.updateFriendStatus(friendId, body.getOrDefault("status", "active"));
@@ -36,10 +52,41 @@ public class FriendsController {
         return friendsService.addGroup(dto);
     }
 
+    @PatchMapping("/groups/{groupId}/members/{friendId}/role")
+    public FriendsDTO.GroupMemberDTO updateGroupRole(@PathVariable Long groupId, @PathVariable Long friendId, @RequestBody Map<String, String> body) {
+        return friendsService.updateGroupRole(groupId, friendId, body.getOrDefault("role", "member"));
+    }
+
+    @GetMapping("/groups/{groupId}/report")
+    public FriendsDTO.GroupReportDTO groupReport(@PathVariable Long groupId) {
+        return friendsService.getGroupReport(groupId);
+    }
+
     @PostMapping("/expenses")
     @ResponseStatus(HttpStatus.CREATED)
     public FriendsDTO.SharedExpenseDTO addExpense(@RequestBody FriendsDTO.SharedExpenseDTO dto) {
         return friendsService.addExpense(dto);
+    }
+
+    @GetMapping("/recurring-expenses")
+    public java.util.List<FriendsDTO.RecurringSharedExpenseDTO> recurringExpenses() {
+        return friendsService.getRecurringExpenses();
+    }
+
+    @PostMapping("/recurring-expenses")
+    @ResponseStatus(HttpStatus.CREATED)
+    public FriendsDTO.RecurringSharedExpenseDTO addRecurringExpense(@RequestBody FriendsDTO.RecurringSharedExpenseDTO dto) {
+        return friendsService.addRecurringExpense(dto);
+    }
+
+    @PostMapping("/recurring-expenses/process-due")
+    public java.util.List<FriendsDTO.SharedExpenseDTO> processDueRecurringExpenses() {
+        return friendsService.processDueRecurringExpenses();
+    }
+
+    @GetMapping("/settlement-suggestions")
+    public java.util.List<FriendsDTO.SettlementSuggestionDTO> settlementSuggestions() {
+        return friendsService.getSettlementSuggestions();
     }
 
     @PostMapping("/settlements")

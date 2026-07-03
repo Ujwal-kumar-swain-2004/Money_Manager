@@ -24,4 +24,5 @@ public interface FriendGroupMemberRepository extends JpaRepository<FriendGroupMe
     List<FriendGroupMemberEntity> findByGroupIdInWithFriend(@Param("groupIds") Collection<Long> groupIds);
 
     boolean existsByGroupIdAndFriendId(Long groupId, Long friendId);
+    java.util.Optional<FriendGroupMemberEntity> findByGroupIdAndFriendId(Long groupId, Long friendId);
 }
