@@ -1,7 +1,10 @@
 $env:SPRING_PROFILES_ACTIVE = "local"
-$env:DB_URL = "jdbc:postgresql://localhost:5439/moneymanager"
-$env:DB_USERNAME = "postgres"
-$env:DB_PASSWORD = "postgres"
+$env:LOCAL_DB_URL = "jdbc:postgresql://localhost:5439/moneymanager"
+$env:LOCAL_DB_USERNAME = "postgres"
+$env:LOCAL_DB_PASSWORD = "postgres"
+$env:SPRING_DATASOURCE_URL = $env:LOCAL_DB_URL
+$env:SPRING_DATASOURCE_USERNAME = $env:LOCAL_DB_USERNAME
+$env:SPRING_DATASOURCE_PASSWORD = $env:LOCAL_DB_PASSWORD
 $env:JWT_SECRET = "supersecretjwtkeythatislongenoughformyapptobesecure12345"
 $env:PORT = "8080"
 $env:BREVO_SMTP_LOGIN = "placeholder_login"
@@ -14,4 +17,4 @@ if (-not $env:OPENAI_API_KEY) {
 }
 
 Set-Location "$PSScriptRoot\Money_Manager-main\moneymanager"
-mvn spring-boot:run *> backend-run.log
+mvn spring-boot:run *> backend-run.local.log
