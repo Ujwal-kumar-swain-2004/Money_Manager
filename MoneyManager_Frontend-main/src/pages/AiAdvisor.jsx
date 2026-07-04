@@ -42,7 +42,7 @@ const AiAdvisor = () => {
         try {
             const response = await axiosConfig.get(API_ENDPOINTS.AI_ADVICE, {
                 params: {question: q},
-                timeout: 60000,
+                timeout: 120000,
             });
             setMessages((prev) => [...prev, {role: "assistant", text: response.data.answer}]);
         } catch (err) {
@@ -52,7 +52,7 @@ const AiAdvisor = () => {
             setMessages((prev) => [...prev, {
                 role: "assistant",
                 text: timedOut
-                    ? "The AI request took too long this time. I have increased the wait time, so try again in a moment."
+                    ? "The local AI model took too long to respond. Ollama may still be loading the model, so try again in a moment."
                     : "Sorry, I could not process that right now. Please try again in a moment.",
             }]);
         } finally {

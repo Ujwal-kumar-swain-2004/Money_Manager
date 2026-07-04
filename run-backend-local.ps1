@@ -12,8 +12,9 @@ $env:BREVO_SMTP_KEY = "placeholder_key"
 $env:BREVO_FROM_EMAIL = "noreply@moneymanager.com"
 $env:FRONTEND_URL = "http://localhost:5173"
 $env:BACKEND_URL = "http://localhost:8080"
-if (-not $env:OPENAI_API_KEY) {
-    $env:OPENAI_API_KEY = [Environment]::GetEnvironmentVariable("OPENAI_API_KEY", "User")
+$env:OLLAMA_BASE_URL = "http://localhost:11434"
+if (-not $env:OLLAMA_MODEL) {
+    $env:OLLAMA_MODEL = "llama3.2:1b"
 }
 
 Set-Location "$PSScriptRoot\Money_Manager-main\moneymanager"

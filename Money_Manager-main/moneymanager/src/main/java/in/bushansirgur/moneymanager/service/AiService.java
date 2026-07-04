@@ -3,6 +3,7 @@ package in.bushansirgur.moneymanager.service;
 import in.bushansirgur.moneymanager.dto.ExpenseDTO;
 import in.bushansirgur.moneymanager.dto.FinancialInsightsResponse;
 import in.bushansirgur.moneymanager.dto.IncomeDTO;
+import in.bushansirgur.moneymanager.dto.SavingsGoalDTO;
 import in.bushansirgur.moneymanager.entity.ProfileEntity;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.client.ChatClient;
@@ -18,11 +19,15 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
 @Slf4j
 public class AiService {
+
+        private static final long AI_TIMEOUT_SECONDS = 25;
 
         private final ChatClient chatClient;
 
@@ -34,6 +39,12 @@ public class AiService {
 
         @Autowired
         private ProfileService profileService;
+
+        @Autowired
+        private SavingsGoalService savingsGoalService;
+
+        @Autowired
+        private PersonalFinanceKnowledgeService personalFinanceKnowledgeService;
 
         public AiService(ObjectProvider<ChatClient.Builder> builderProvider) {
                 ChatClient.Builder builder = builderProvider.getIfAvailable();
@@ -56,24 +67,32 @@ public class AiService {
         public String getFinancialAdvice(String userQuestion) {
                 ProfileEntity profile = profileService.getCurrentProfile();
                 String context = buildFinancialContext(profile);
+                String knowledge = personalFinanceKnowledgeService.retrieveKnowledge(userQuestion, context);
 
                 try {
                         if (chatClient == null) {
                                 return buildFallbackAdvice(userQuestion);
                         }
-                        return chatClient.prompt()
-                                .user(u -> u.text("""
-                                                Here is the financial data for the user:
-                                                {context}
+                        return CompletableFuture.supplyAsync(() -> chatClient.prompt()
+                                        .user(u -> u.text("""
+                                                        Here is the financial data for the user:
+                                                        {context}
 
-                                                User's question: {question}
+                                                        User's question: {question}
 
-                                                Please answer based on the above data. Keep the answer practical and short.
-                                                """)
-                                                .param("context", context)
-                                                .param("question", userQuestion))
-                                .call()
-                                .content();
+                                                        Relevant finance knowledge:
+                                                        {knowledge}
+
+                                                        Please answer based on the user's data first, then use the relevant finance knowledge when helpful.
+                                                        Keep the answer practical and short. If mentioning tax, say it is educational guidance.
+                                                        """)
+                                                        .param("context", context)
+                                                        .param("knowledge", knowledge)
+                                                        .param("question", userQuestion))
+                                        .call()
+                                        .content())
+                                .orTimeout(AI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                                .join();
                 } catch (Exception ex) {
                         log.warn("AI advice unavailable, using local fallback: {}", ex.getMessage());
                         return buildFallbackAdvice(userQuestion);
@@ -83,30 +102,37 @@ public class AiService {
         public List<FinancialInsightsResponse.FinancialInsight> getSpendingInsights() {
                 ProfileEntity profile = profileService.getCurrentProfile();
                 String context = buildFinancialContext(profile);
+                String knowledge = personalFinanceKnowledgeService.retrieveKnowledge("spending insights budget savings goals", context);
 
                 try {
                         if (chatClient == null) {
                                 return buildFallbackInsights();
                         }
-                        FinancialInsightsResponse response = chatClient.prompt()
-                                .user(u -> u.text(
-                                                """
-                                                                Analyze the following financial data and provide 3 to 5 actionable insights.
-                                                                Each insight should be specific, using actual numbers from the data.
+                        FinancialInsightsResponse response = CompletableFuture.supplyAsync(() -> chatClient.prompt()
+                                        .user(u -> u.text(
+                                                        """
+                                                                        Analyze the following financial data and provide 3 to 5 actionable insights.
+                                                                        Each insight should be specific, using actual numbers from the data.
 
-                                                                Financial Data:
-                                                                {context}
+                                                                        Financial Data:
+                                                                        {context}
 
-                                                                Generate insights covering:
-                                                                - Spending patterns and trends
-                                                                - Balance health (positive or concerning)
-                                                                - Top spending categories
-                                                                - Saving opportunities
-                                                                - Any anomalies or notable patterns
-                                                                """)
-                                                .param("context", context))
-                                .call()
-                                .entity(FinancialInsightsResponse.class);
+                                                                        Relevant Finance Knowledge:
+                                                                        {knowledge}
+
+                                                                        Generate insights covering:
+                                                                        - Spending patterns and trends
+                                                                        - Balance health (positive or concerning)
+                                                                        - Top spending categories
+                                                                        - Saving opportunities
+                                                                        - Any anomalies or notable patterns
+                                                                        """)
+                                                        .param("context", context)
+                                                        .param("knowledge", knowledge))
+                                        .call()
+                                        .entity(FinancialInsightsResponse.class))
+                                .orTimeout(AI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
+                                .join();
 
                         if (response == null || response.getInsights() == null) {
                                 return buildFallbackInsights();
@@ -231,6 +257,7 @@ public class AiService {
                                 totalIncome, totalExpense,
                                 totalIncome.subtract(totalExpense),
                                 byCategory);
+                String knowledge = personalFinanceKnowledgeService.retrieveKnowledge("monthly report budget savings tax goals", summary);
 
                 if (chatClient == null) {
                         String fallbackNarrative = String.format(
@@ -245,6 +272,7 @@ public class AiService {
                                                 """
                                                                 Write a warm, encouraging monthly financial summary email body for {name}.
                                                                 Data: {summary}
+                                                                Relevant finance knowledge: {knowledge}
 
                                                                 Include:
                                                                 1. A brief overall assessment (2-3 sentences)
@@ -256,7 +284,8 @@ public class AiService {
                                                                 Do NOT include html/body/head tags — just the content paragraphs.
                                                                 """)
                                                 .param("name", profile.getFullName())
-                                                .param("summary", summary))
+                                                .param("summary", summary)
+                                                .param("knowledge", knowledge))
                                 .call()
                                 .content();
                 return buildEmailHtmlTemplate(profile.getFullName(), month, year, aiNarrative,
@@ -266,6 +295,7 @@ public class AiService {
         private String buildFinancialContext(ProfileEntity profile) {
                 List<IncomeDTO> incomes = incomeService.getCurrentMonthIncomesForCurrentUser();
                 List<ExpenseDTO> expenses = expenseService.getCurrentMonthExpensesForCurrentUser();
+                List<SavingsGoalDTO> savingsGoals = savingsGoalService.list();
 
                 BigDecimal totalIncome = incomes.stream()
                                 .map(IncomeDTO::getAmount)
@@ -306,6 +336,15 @@ public class AiService {
                 sb.append("=== BALANCE ===\n");
                 sb.append("Net Balance: ₹").append(totalIncome.subtract(totalExpense)).append("\n");
 
+                if (!savingsGoals.isEmpty()) {
+                        sb.append("\n=== USER SAVINGS GOALS ===\n");
+                        savingsGoals.stream().limit(10).forEach(goal -> sb.append("- ").append(goal.getName())
+                                        .append(" | Target: Rs ").append(goal.getTargetAmount())
+                                        .append(" | Saved: Rs ").append(goal.getSavedAmount())
+                                        .append(" | Progress: ").append(goal.getProgressPercent()).append("%")
+                                        .append(" | Target date: ").append(goal.getTargetDate()).append("\n"));
+                }
+
                 if (!incomes.isEmpty()) {
                         sb.append("\n=== INCOME DETAILS ===\n");
                         incomes.stream().limit(15).forEach(i -> sb.append("- ").append(i.getName())
@@ -322,7 +361,43 @@ public class AiService {
                                         .append(" | Category: ").append(e.getCategoryName()).append("\n"));
                 }
 
+                appendStatementNotes(sb, incomes, expenses);
+
                 return sb.toString();
+        }
+
+        private void appendStatementNotes(StringBuilder sb, List<IncomeDTO> incomes, List<ExpenseDTO> expenses) {
+                List<String> incomeNotes = incomes.stream()
+                                .filter(i -> hasText(i.getNotes()) || hasText(i.getTags()) || hasText(i.getPaymentMethod()))
+                                .limit(5)
+                                .map(i -> "- Income: " + i.getName()
+                                                + " | Payment: " + valueOrDash(i.getPaymentMethod())
+                                                + " | Tags: " + valueOrDash(i.getTags())
+                                                + " | Notes: " + valueOrDash(i.getNotes()))
+                                .toList();
+
+                List<String> expenseNotes = expenses.stream()
+                                .filter(e -> hasText(e.getNotes()) || hasText(e.getTags()) || hasText(e.getPaymentMethod()))
+                                .limit(10)
+                                .map(e -> "- Expense: " + e.getName()
+                                                + " | Payment: " + valueOrDash(e.getPaymentMethod())
+                                                + " | Tags: " + valueOrDash(e.getTags())
+                                                + " | Notes: " + valueOrDash(e.getNotes()))
+                                .toList();
+
+                if (!incomeNotes.isEmpty() || !expenseNotes.isEmpty()) {
+                        sb.append("\n=== BANK STATEMENT NOTES AND TAGS ===\n");
+                        incomeNotes.forEach(note -> sb.append(note).append("\n"));
+                        expenseNotes.forEach(note -> sb.append(note).append("\n"));
+                }
+        }
+
+        private boolean hasText(String value) {
+                return value != null && !value.isBlank();
+        }
+
+        private String valueOrDash(String value) {
+                return hasText(value) ? value : "-";
         }
 
         private String buildEmailHtmlTemplate(String name, String month, String year,
