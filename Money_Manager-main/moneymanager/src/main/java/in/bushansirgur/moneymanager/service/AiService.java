@@ -46,6 +46,9 @@ public class AiService {
         @Autowired
         private PersonalFinanceKnowledgeService personalFinanceKnowledgeService;
 
+        @Autowired
+        private AiConversationMemoryService aiConversationMemoryService;
+
         public AiService(ObjectProvider<ChatClient.Builder> builderProvider) {
                 ChatClient.Builder builder = builderProvider.getIfAvailable();
                 this.chatClient = builder == null ? null : builder
@@ -54,6 +57,7 @@ public class AiService {
                                                 You ONLY answer questions about personal finance, budgeting, saving, and spending analysis.
                                                 Always refer to money amounts in Indian Rupees (₹).
                                                 Be concise, warm, and specific. Use numbers from the provided data.
+                                                Do not treat savings goals, target balances, or saved amounts as expenses.
                                                 Keep normal chat answers under 180 words unless the user asks for a detailed plan.
                                                 If asked about anything unrelated to finance, politely redirect to financial topics.
                                                 """)
@@ -68,13 +72,19 @@ public class AiService {
                 ProfileEntity profile = profileService.getCurrentProfile();
                 String context = buildFinancialContext(profile);
                 String knowledge = personalFinanceKnowledgeService.retrieveKnowledge(userQuestion, context);
+                String conversationMemory = aiConversationMemoryService.recentConversationForProfile(profile.getId());
 
                 try {
                         if (chatClient == null) {
-                                return buildFallbackAdvice(userQuestion);
+                                String fallback = buildFallbackAdvice(userQuestion);
+                                aiConversationMemoryService.remember(profile.getId(), userQuestion, fallback);
+                                return fallback;
                         }
-                        return CompletableFuture.supplyAsync(() -> chatClient.prompt()
+                        String answer = CompletableFuture.supplyAsync(() -> chatClient.prompt()
                                         .user(u -> u.text("""
+                                                        Recent conversation in this session:
+                                                        {conversationMemory}
+
                                                         Here is the financial data for the user:
                                                         {context}
 
@@ -84,8 +94,10 @@ public class AiService {
                                                         {knowledge}
 
                                                         Please answer based on the user's data first, then use the relevant finance knowledge when helpful.
+                                                        Savings goals are targets, not spending categories.
                                                         Keep the answer practical and short. If mentioning tax, say it is educational guidance.
                                                         """)
+                                                        .param("conversationMemory", conversationMemory)
                                                         .param("context", context)
                                                         .param("knowledge", knowledge)
                                                         .param("question", userQuestion))
@@ -93,9 +105,13 @@ public class AiService {
                                         .content())
                                 .orTimeout(AI_TIMEOUT_SECONDS, TimeUnit.SECONDS)
                                 .join();
+                        aiConversationMemoryService.remember(profile.getId(), userQuestion, answer);
+                        return answer;
                 } catch (Exception ex) {
                         log.warn("AI advice unavailable, using local fallback: {}", ex.getMessage());
-                        return buildFallbackAdvice(userQuestion);
+                        String fallback = buildFallbackAdvice(userQuestion);
+                        aiConversationMemoryService.remember(profile.getId(), userQuestion, fallback);
+                        return fallback;
                 }
         }
 

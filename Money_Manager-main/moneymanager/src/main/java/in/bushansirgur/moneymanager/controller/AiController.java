@@ -1,9 +1,13 @@
 package in.bushansirgur.moneymanager.controller;
 
 import in.bushansirgur.moneymanager.dto.FinancialInsightsResponse;
+import in.bushansirgur.moneymanager.entity.ProfileEntity;
+import in.bushansirgur.moneymanager.service.AiConversationMemoryService;
 import in.bushansirgur.moneymanager.service.AiService;
+import in.bushansirgur.moneymanager.service.ProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +22,12 @@ public class AiController {
 
     @Autowired
     private AiService aiService;
+
+    @Autowired
+    private ProfileService profileService;
+
+    @Autowired
+    private AiConversationMemoryService aiConversationMemoryService;
 
     /**
      * Feature 1: AI Financial Advisor
@@ -44,5 +54,12 @@ public class AiController {
     public ResponseEntity<List<FinancialInsightsResponse.FinancialInsight>> getSpendingInsights() {
         List<FinancialInsightsResponse.FinancialInsight> insights = aiService.getSpendingInsights();
         return ResponseEntity.ok(insights);
+    }
+
+    @DeleteMapping("/memory")
+    public ResponseEntity<Map<String, String>> clearConversationMemory() {
+        ProfileEntity profile = profileService.getCurrentProfile();
+        aiConversationMemoryService.clear(profile.getId());
+        return ResponseEntity.ok(Map.of("message", "AI conversation memory cleared"));
     }
 }
