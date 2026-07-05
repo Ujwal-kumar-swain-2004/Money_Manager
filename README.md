@@ -10,7 +10,7 @@ The goal of the system is to help a real user track where money comes from, wher
 | --- | --- |
 | Frontend | React, Vite, Tailwind CSS, Axios, React Router, Recharts, Lucide Icons |
 | Backend | Spring Boot 3, Spring Security, JWT, Spring Data JPA, Spring AI |
-| Database | PostgreSQL |
+| Database | PostgreSQL, Redis cache |
 | Exports | Apache POI for Excel |
 | Email | Spring Mail / Brevo SMTP configuration |
 | DevOps | Docker, Docker Compose, PowerShell local run scripts |
@@ -22,7 +22,7 @@ Money_Manager/
 +-- MoneyManager_Frontend-main/      # React/Vite frontend
 +-- Money_Manager-main/
 |   +-- moneymanager/                # Spring Boot backend
-+-- docker-compose.yml               # PostgreSQL + backend + frontend containers
++-- docker-compose.yml               # PostgreSQL + Redis + backend + frontend containers
 +-- run-backend-local.ps1            # Local backend runner
 +-- run-frontend-local.ps1           # Local frontend runner
 ```
@@ -81,19 +81,24 @@ Money_Manager/
 
 - AI advice endpoint for financial guidance.
 - AI insights card for quick spending analysis.
-- Spring AI / OpenAI integration through `OPENAI_API_KEY`.
+- Spring AI integration with local Ollama for development.
+- RAG-style personal finance knowledge snippets for better budgeting guidance.
+- Per-user AI chat history stored in PostgreSQL, so the advisor can reload previous messages after page changes or backend restarts.
+- Recent conversation memory is included in prompts so follow-up questions have context.
 - Local fallback advice when the external AI API is slow, unavailable, or quota-limited.
 
 ## Demo User
 
-The app includes demo seed data so the UI does not look empty during testing.
+The local Docker database currently has a rich mock user for testing and interviews.
 
 ```text
-Email: demo@moneymanager.local
-Password: Demo@12345
+Email: ujwalkuswain123@gmail.com
+Password: Ujwal123
 ```
 
-Demo data includes categories, income, expenses, budgets, savings goals, recurring transactions, bill reminders, family members, friends, groups, shared expenses, settlements, reminders, comments, and activity history.
+Mock data includes categories, income, expenses, budgets, savings goals, recurring transactions, bill reminders, family members, friends, groups, shared expenses, settlements, reminders, comments, activity history, and AI chat history.
+
+This data is stored in the local Docker PostgreSQL volume. It will survive normal Docker restarts.
 
 ## Local Setup
 
@@ -102,8 +107,15 @@ Demo data includes categories, income, expenses, budgets, savings goals, recurri
 - Java 21
 - Maven
 - Node.js and npm
-- PostgreSQL, or Docker for the database
-- Optional: OpenAI API key for live AI responses
+- Docker Desktop for PostgreSQL and Redis
+- Optional: Ollama for local AI responses
+
+For local AI:
+
+```powershell
+ollama pull llama3.2:1b
+ollama serve
+```
 
 ### Environment Variables
 
@@ -117,7 +129,8 @@ JWT_SECRET=use-a-long-secret-value
 PORT=8080
 FRONTEND_URL=http://localhost:5173
 BACKEND_URL=http://localhost:8080
-OPENAI_API_KEY=your-openai-api-key
+OLLAMA_BASE_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2:1b
 BREVO_SMTP_LOGIN=your-smtp-login
 BREVO_SMTP_KEY=your-smtp-key
 BREVO_FROM_EMAIL=noreply@moneymanager.com
@@ -127,10 +140,10 @@ Do not commit real API keys or SMTP secrets. Keep them in local environment vari
 
 ## Run Locally
 
-Start PostgreSQL with Docker Compose:
+Start PostgreSQL and Redis with Docker Compose:
 
 ```powershell
-docker compose up -d db
+docker compose up -d db redis
 ```
 
 Run the backend:
@@ -157,6 +170,34 @@ Backend API base URL:
 http://localhost:8080/api/v1.0
 ```
 
+If the app feels slow locally, confirm the backend is using the Docker PostgreSQL database on port `5439`, not a remote production database.
+
+## Local Data Persistence
+
+Docker stores the local PostgreSQL database in this volume:
+
+```text
+money_manager_postgres_data
+```
+
+Safe commands that keep data:
+
+```powershell
+docker restart moneymanager-db
+docker restart moneymanager-redis
+docker compose stop
+docker compose up -d
+```
+
+Commands that remove local database data:
+
+```powershell
+docker compose down -v
+docker volume rm money_manager_postgres_data
+```
+
+Use `down -v` only when you intentionally want a clean database.
+
 ## Docker Run
 
 To run the full stack with Docker Compose:
@@ -172,6 +213,7 @@ Docker ports:
 | Frontend | `http://localhost` |
 | Backend | `http://localhost:8082/api/v1.0` |
 | PostgreSQL | `localhost:5439` |
+| Redis | `localhost:6379` |
 
 ## API Overview
 
@@ -185,7 +227,7 @@ Most protected endpoints require a JWT token from login.
 | Expenses | `/expenses` |
 | Dashboard | `/dashboard` |
 | Filters | `/filter` |
-| AI | `/ai/advice`, `/ai/insights` |
+| AI | `/ai/advice`, `/ai/insights`, `/ai/history`, `DELETE /ai/memory` |
 | Budgets | `/budgets` |
 | Savings | `/savings-goals`, `/savings-goals/{goalId}/contributions` |
 | Recurring | `/recurring-transactions`, `/recurring-transactions/process-due` |
@@ -228,9 +270,10 @@ Before production deployment:
 - Move secrets into environment variables or platform secret storage.
 - Disable development-only logging.
 - Review CORS origins.
-- Add database migrations with Flyway or Liquibase.
+- Add database migrations with Flyway or Liquibase. Currently local development uses Hibernate `ddl-auto=update`.
 - Add automated backend and frontend tests.
 - Add rate limits for AI and auth endpoints.
+- Use managed PostgreSQL, managed Redis, and production-grade AI hosting for production.
 - Configure HTTPS and secure cookies if the auth strategy is changed.
 - Store receipts or attachments in cloud storage instead of the local filesystem.
 

@@ -1,8 +1,48 @@
-# React + Vite
+# Money Manager Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React/Vite frontend for the Money Manager application.
 
-Currently, two official plugins are available:
+## Run Locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+From the repository root:
+
+```powershell
+.\run-frontend-local.ps1
+```
+
+Or from this folder:
+
+```powershell
+npm install
+npm run dev
+```
+
+Local URL:
+
+```text
+http://localhost:5173
+```
+
+The frontend expects the backend at:
+
+```text
+http://localhost:8080/api/v1.0
+```
+
+Set `VITE_API_URL` if you need a different backend URL.
+
+## Main Pages
+
+- Dashboard
+- Categories
+- Income and expenses
+- Money Plan
+- Family money manager
+- Friends and split expenses
+- AI Advisor with persistent per-user chat history
+
+## Build
+
+```powershell
+npm run build
+```
