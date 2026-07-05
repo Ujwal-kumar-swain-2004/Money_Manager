@@ -3,7 +3,7 @@ import Dashboard from "../components/Dashboard.jsx";
 import {useUser} from "../hooks/useUser.jsx";
 import axiosConfig from "../util/axiosConfig.jsx";
 import {API_ENDPOINTS} from "../util/apiEndpoints.js";
-import {Bot, Loader2, Send, Sparkles, User} from "lucide-react";
+import {Bot, Loader2, Send, Sparkles, Trash2, User} from "lucide-react";
 import toast from "react-hot-toast";
 
 const SUGGESTED_QUESTIONS = [
@@ -14,14 +14,16 @@ const SUGGESTED_QUESTIONS = [
     "What are my biggest unnecessary expenses?",
 ];
 
+const DEFAULT_MESSAGES = [
+    {
+        role: "assistant",
+        text: "Hi, I am your AI Financial Advisor.\n\nI can use your income and expense data to help you understand spending, budgets, savings, and cashflow. What would you like to know?",
+    },
+];
+
 const AiAdvisor = () => {
     useUser();
-    const [messages, setMessages] = useState([
-        {
-            role: "assistant",
-            text: "Hi, I am your AI Financial Advisor.\n\nI can use your income and expense data to help you understand spending, budgets, savings, and cashflow. What would you like to know?",
-        },
-    ]);
+    const [messages, setMessages] = useState(DEFAULT_MESSAGES);
     const [input, setInput] = useState("");
     const [loading, setLoading] = useState(false);
     const bottomRef = useRef(null);
@@ -30,6 +32,20 @@ const AiAdvisor = () => {
     useEffect(() => {
         bottomRef.current?.scrollIntoView({behavior: "smooth"});
     }, [messages, loading]);
+
+    useEffect(() => {
+        const loadHistory = async () => {
+            try {
+                const response = await axiosConfig.get(API_ENDPOINTS.AI_HISTORY);
+                const history = response.data || [];
+                setMessages(history.length ? history.map((item) => ({role: item.role, text: item.text})) : DEFAULT_MESSAGES);
+            } catch (err) {
+                console.error("AI history error:", err.response?.data || err.message);
+            }
+        };
+
+        loadHistory();
+    }, []);
 
     const sendMessage = async (question) => {
         const q = question || input.trim();
@@ -68,6 +84,17 @@ const AiAdvisor = () => {
         }
     };
 
+    const clearHistory = async () => {
+        try {
+            await axiosConfig.delete(API_ENDPOINTS.AI_MEMORY);
+            setMessages(DEFAULT_MESSAGES);
+            toast.success("AI chat history cleared");
+        } catch (err) {
+            console.error("AI clear history error:", err.response?.data || err.message);
+            toast.error("Could not clear chat history");
+        }
+    };
+
     return (
         <Dashboard activeMenu="AI Advisor">
             <div className="mx-auto flex max-w-7xl flex-col gap-4" style={{height: "calc(100vh - 110px)"}}>
@@ -85,6 +112,14 @@ const AiAdvisor = () => {
                         </h2>
                         <p className="mt-0.5 text-sm text-white/72">Ask anything about your finances using your real app data.</p>
                     </div>
+                    <button
+                        type="button"
+                        onClick={clearHistory}
+                        className="ml-auto flex h-10 w-10 items-center justify-center rounded-md border border-white/14 bg-white/5 text-white/72 transition-colors hover:border-[#d9ff72]/60 hover:text-[#d9ff72]"
+                        title="Clear chat history"
+                    >
+                        <Trash2 size={16} />
+                    </button>
                 </div>
 
                 <div className="panel flex flex-1 flex-col overflow-hidden p-0">

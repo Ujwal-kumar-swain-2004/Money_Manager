@@ -24,6 +24,8 @@ export const API_ENDPOINTS = {
     UPLOAD_IMAGE: `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,
     AI_ADVICE: "/ai/advice",
     AI_INSIGHTS: "/ai/insights",
+    AI_HISTORY: "/ai/history",
+    AI_MEMORY: "/ai/memory",
     BUDGETS: "/budgets",
     SAVINGS_GOALS: "/savings-goals",
     GOAL_CONTRIBUTIONS: (goalId) => `/savings-goals/${goalId}/contributions`,

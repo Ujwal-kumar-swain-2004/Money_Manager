@@ -21,5 +21,12 @@ public interface SharedExpenseRepository extends JpaRepository<SharedExpenseEnti
 
     Optional<SharedExpenseEntity> findByIdAndProfileId(Long id, Long profileId);
     long countByProfileIdAndExpenseDateBetween(Long profileId, LocalDate startDate, LocalDate endDate);
-    List<SharedExpenseEntity> findByProfileIdAndGroupId(Long profileId, Long groupId);
+    @Query("""
+            select expense from SharedExpenseEntity expense
+            left join fetch expense.paidByFriend
+            left join fetch expense.group
+            where expense.profile.id = :profileId
+            and expense.group.id = :groupId
+            """)
+    List<SharedExpenseEntity> findByProfileIdAndGroupId(@Param("profileId") Long profileId, @Param("groupId") Long groupId);
 }

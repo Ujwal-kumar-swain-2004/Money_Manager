@@ -1,5 +1,6 @@
 package in.bushansirgur.moneymanager.controller;
 
+import in.bushansirgur.moneymanager.dto.AiChatMessageDTO;
 import in.bushansirgur.moneymanager.dto.FinancialInsightsResponse;
 import in.bushansirgur.moneymanager.entity.ProfileEntity;
 import in.bushansirgur.moneymanager.service.AiConversationMemoryService;
@@ -54,6 +55,11 @@ public class AiController {
     public ResponseEntity<List<FinancialInsightsResponse.FinancialInsight>> getSpendingInsights() {
         List<FinancialInsightsResponse.FinancialInsight> insights = aiService.getSpendingInsights();
         return ResponseEntity.ok(insights);
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<List<AiChatMessageDTO>> getConversationHistory() {
+        return ResponseEntity.ok(aiConversationMemoryService.historyForCurrentProfile());
     }
 
     @DeleteMapping("/memory")
