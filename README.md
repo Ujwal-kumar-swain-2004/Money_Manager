@@ -305,6 +305,235 @@ flowchart LR
     Backend --> Storage
 ```
 
+### Entity Relationship Diagram
+
+```mermaid
+erDiagram
+    PROFILE {
+        bigint id PK
+        string fullName
+        string email
+        string planType
+        boolean isActive
+    }
+
+    CATEGORY {
+        bigint id PK
+        bigint profile_id FK
+        string name
+        string type
+    }
+
+    INCOME {
+        bigint id PK
+        bigint profile_id FK
+        bigint category_id FK
+        bigint family_member_id FK
+        decimal amount
+        date date
+    }
+
+    EXPENSE {
+        bigint id PK
+        bigint profile_id FK
+        bigint category_id FK
+        bigint family_member_id FK
+        decimal amount
+        date date
+    }
+
+    BUDGET {
+        bigint id PK
+        bigint profile_id FK
+        bigint category_id FK
+        decimal amount
+        int month
+        int year
+    }
+
+    SAVINGS_GOAL {
+        bigint id PK
+        bigint profile_id FK
+        string name
+        decimal targetAmount
+        decimal savedAmount
+        date targetDate
+    }
+
+    SAVINGS_CONTRIBUTION {
+        bigint id PK
+        bigint profile_id FK
+        bigint goal_id FK
+        decimal amount
+        date contributionDate
+    }
+
+    RECURRING_TRANSACTION {
+        bigint id PK
+        bigint profile_id FK
+        bigint category_id FK
+        string type
+        string frequency
+        decimal amount
+        date nextRunDate
+    }
+
+    BILL_REMINDER {
+        bigint id PK
+        bigint profile_id FK
+        bigint category_id FK
+        string type
+        decimal amount
+        date dueDate
+        boolean paid
+    }
+
+    FAMILY {
+        bigint id PK
+        bigint owner_profile_id FK
+        string name
+        string inviteCode
+    }
+
+    FAMILY_MEMBER {
+        bigint id PK
+        bigint family_id FK
+        bigint profile_id FK
+        string name
+        string role
+    }
+
+    FAMILY_TRANSFER {
+        bigint id PK
+        bigint family_id FK
+        bigint from_member_id FK
+        bigint to_member_id FK
+        decimal amount
+        date transferDate
+    }
+
+    FRIEND {
+        bigint id PK
+        bigint profile_id FK
+        string name
+        string email
+        string status
+        decimal openingBalance
+    }
+
+    FRIEND_GROUP {
+        bigint id PK
+        bigint profile_id FK
+        string name
+        string type
+    }
+
+    FRIEND_GROUP_MEMBER {
+        bigint id PK
+        bigint group_id FK
+        bigint friend_id FK
+        string role
+    }
+
+    SHARED_EXPENSE {
+        bigint id PK
+        bigint profile_id FK
+        bigint paid_by_friend_id FK
+        bigint group_id FK
+        string title
+        decimal amount
+        date expenseDate
+    }
+
+    SHARED_EXPENSE_SPLIT {
+        bigint id PK
+        bigint expense_id FK
+        bigint friend_id FK
+        decimal amount
+        decimal percentValue
+    }
+
+    FRIEND_SETTLEMENT {
+        bigint id PK
+        bigint profile_id FK
+        bigint friend_id FK
+        decimal amount
+        date settlementDate
+    }
+
+    FRIEND_REMINDER {
+        bigint id PK
+        bigint profile_id FK
+        bigint friend_id FK
+        string message
+        decimal amount
+        date dueDate
+    }
+
+    FRIEND_COMMENT {
+        bigint id PK
+        bigint expense_id FK
+        string comment
+    }
+
+    FRIEND_ACTIVITY {
+        bigint id PK
+        bigint profile_id FK
+        string type
+        string message
+    }
+
+    AI_CHAT_MESSAGE {
+        bigint id PK
+        bigint profile_id FK
+        string role
+        text message
+    }
+
+    PROFILE ||--o{ CATEGORY : owns
+    PROFILE ||--o{ INCOME : records
+    PROFILE ||--o{ EXPENSE : records
+    PROFILE ||--o{ BUDGET : plans
+    PROFILE ||--o{ SAVINGS_GOAL : tracks
+    PROFILE ||--o{ SAVINGS_CONTRIBUTION : records
+    PROFILE ||--o{ RECURRING_TRANSACTION : automates
+    PROFILE ||--o{ BILL_REMINDER : schedules
+    PROFILE ||--o{ FAMILY : owns
+    PROFILE ||--o{ FAMILY_MEMBER : can_link
+    PROFILE ||--o{ FRIEND : owns
+    PROFILE ||--o{ FRIEND_GROUP : owns
+    PROFILE ||--o{ SHARED_EXPENSE : records
+    PROFILE ||--o{ FRIEND_SETTLEMENT : records
+    PROFILE ||--o{ FRIEND_REMINDER : schedules
+    PROFILE ||--o{ FRIEND_ACTIVITY : logs
+    PROFILE ||--o{ AI_CHAT_MESSAGE : stores
+
+    CATEGORY ||--o{ INCOME : categorizes
+    CATEGORY ||--o{ EXPENSE : categorizes
+    CATEGORY ||--o{ BUDGET : limits
+    CATEGORY ||--o{ RECURRING_TRANSACTION : categorizes
+    CATEGORY ||--o{ BILL_REMINDER : categorizes
+
+    SAVINGS_GOAL ||--o{ SAVINGS_CONTRIBUTION : receives
+
+    FAMILY ||--o{ FAMILY_MEMBER : has
+    FAMILY ||--o{ FAMILY_TRANSFER : records
+    FAMILY_MEMBER ||--o{ INCOME : can_own
+    FAMILY_MEMBER ||--o{ EXPENSE : can_own
+    FAMILY_MEMBER ||--o{ FAMILY_TRANSFER : from
+    FAMILY_MEMBER ||--o{ FAMILY_TRANSFER : to
+
+    FRIEND_GROUP ||--o{ FRIEND_GROUP_MEMBER : includes
+    FRIEND ||--o{ FRIEND_GROUP_MEMBER : joins
+    FRIEND_GROUP ||--o{ SHARED_EXPENSE : groups
+    FRIEND ||--o{ SHARED_EXPENSE : paid_by
+    SHARED_EXPENSE ||--o{ SHARED_EXPENSE_SPLIT : splits
+    FRIEND ||--o{ SHARED_EXPENSE_SPLIT : owes
+    FRIEND ||--o{ FRIEND_SETTLEMENT : settles
+    FRIEND ||--o{ FRIEND_REMINDER : reminded
+    SHARED_EXPENSE ||--o{ FRIEND_COMMENT : has
+```
+
 ### Interview Explanation
 
 The application follows a layered full-stack architecture. The React/Vite frontend communicates with the Spring Boot backend through JWT-authenticated REST APIs. The backend is split into controllers, services, repositories, entities, and DTOs. PostgreSQL stores user data, transactions, budgets, friends, family records, and AI chat history. Redis caches repeated reads such as dashboard, money plan, categories, and analytics. Spring AI connects to Ollama locally, and the advisor uses finance knowledge snippets plus recent chat history to answer follow-up questions.
