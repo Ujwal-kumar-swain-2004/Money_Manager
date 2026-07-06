@@ -237,6 +237,80 @@ Most protected endpoints require a JWT token from login.
 | Family | `/families`, `/families/{id}/dashboard`, `/members`, `/transfers` |
 | Friends | `/friends/dashboard`, `/friends`, `/friends/groups`, `/friends/expenses`, `/friends/settlements`, `/friends/reminders` |
 
+## Architecture Diagrams
+
+### Full Application Architecture
+
+```mermaid
+flowchart TB
+    User[User Browser] --> Frontend[React + Vite Frontend]
+
+    Frontend -->|JWT authenticated REST calls| Backend[Spring Boot Backend]
+
+    Backend --> Security[Spring Security + JWT]
+    Backend --> Controllers[REST Controllers]
+    Controllers --> Services[Service Layer]
+    Services --> Repositories[Spring Data JPA Repositories]
+
+    Repositories --> Postgres[(PostgreSQL Database)]
+    Services --> Redis[(Redis Cache)]
+
+    Services --> SpringAI[Spring AI Service]
+    SpringAI --> Ollama[Local Ollama Model]
+    SpringAI --> Knowledge[RAG-style Finance Knowledge]
+    SpringAI --> AiHistory[(AI Chat History Table)]
+
+    Services --> Mail[Brevo SMTP Email]
+    Services --> Cloudinary[Cloudinary Image Upload]
+
+    Backend --> WebSocket[Friend WebSocket Events]
+    WebSocket --> Frontend
+```
+
+### Local Development Architecture
+
+```mermaid
+flowchart LR
+    React[localhost:5173 React Frontend]
+    Spring[localhost:8080 Spring Boot API]
+    Postgres[Docker PostgreSQL localhost:5439]
+    Redis[Docker Redis localhost:6379]
+    Ollama[Ollama localhost:11434]
+
+    React --> Spring
+    Spring --> Postgres
+    Spring --> Redis
+    Spring --> Ollama
+```
+
+### Production Architecture
+
+```mermaid
+flowchart LR
+    User[User]
+    Frontend[Deployed Frontend]
+    Backend[Deployed Spring Boot Backend]
+    Neon[(Neon PostgreSQL)]
+    Redis[(Managed Redis)]
+    AI[Hosted AI Provider or Hosted Ollama]
+    Email[Brevo SMTP]
+    Storage[Cloudinary or Object Storage]
+
+    User --> Frontend
+    Frontend --> Backend
+    Backend --> Neon
+    Backend --> Redis
+    Backend --> AI
+    Backend --> Email
+    Backend --> Storage
+```
+
+### Interview Explanation
+
+The application follows a layered full-stack architecture. The React/Vite frontend communicates with the Spring Boot backend through JWT-authenticated REST APIs. The backend is split into controllers, services, repositories, entities, and DTOs. PostgreSQL stores user data, transactions, budgets, friends, family records, and AI chat history. Redis caches repeated reads such as dashboard, money plan, categories, and analytics. Spring AI connects to Ollama locally, and the advisor uses finance knowledge snippets plus recent chat history to answer follow-up questions.
+
+The project currently uses PostgreSQL locally through Docker and PostgreSQL in production through Neon. MySQL could also be used because the backend uses Spring Data JPA and Hibernate, but PostgreSQL keeps local behavior closer to production.
+
 ## Backend Design
 
 The backend follows a standard Spring Boot layered structure:
