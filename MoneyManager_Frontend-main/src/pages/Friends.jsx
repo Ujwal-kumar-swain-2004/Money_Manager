@@ -13,6 +13,11 @@ import {cacheTimes, queryKeys} from "../util/queryClient.js";
 
 const today = new Date().toISOString().slice(0, 10);
 const money = (value) => `Rs ${Number(value || 0).toLocaleString("en-IN")}`;
+const normalizeStatus = (status) => String(status || "active").toLowerCase();
+const displayStatus = (status) => {
+    const normalized = normalizeStatus(status);
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+};
 
 const Friends = () => {
     const {user} = useUser();
@@ -275,26 +280,36 @@ const Friends = () => {
 
                     <Panel title="Friend balances" action={`${friends.length} friends`}>
                         <div className="grid gap-3 md:grid-cols-2">
-                            {friends.map((friend) => (
-                                <div key={friend.id} className="rounded-lg border border-white/14 bg-white/[0.03] p-4">
-                                    <div className="flex items-start justify-between gap-3">
-                                        <div>
-                                            <p className="font-semibold text-white">{friend.name}</p>
-                                            <p className="text-xs text-white/65">{friend.email || friend.phone || friend.inviteCode}</p>
+                            {friends.map((friend) => {
+                                const status = normalizeStatus(friend.status);
+                                const isActive = status === "active";
+                                const isRejected = status === "rejected";
+                                const isBlocked = status === "blocked";
+                                return (
+                                    <div key={friend.id} className="rounded-lg border border-white/14 bg-white/[0.03] p-4">
+                                        <div className="flex items-start justify-between gap-3">
+                                            <div>
+                                                <p className="font-semibold text-white">{friend.name}</p>
+                                                <p className="text-xs text-white/65">{friend.email || friend.phone || friend.inviteCode}</p>
+                                            </div>
+                                            <span className={`rounded-md px-2 py-1 text-xs ${isActive ? "bg-emerald-400/10 text-emerald-200" : "bg-white/10 text-white/78"}`}>{displayStatus(friend.status)}</span>
                                         </div>
-                                        <span className={`rounded-md px-2 py-1 text-xs ${friend.status === "active" ? "bg-emerald-400/10 text-emerald-200" : "bg-white/10 text-white/78"}`}>{friend.status}</span>
+                                        <p className={`mt-3 text-xl font-black ${Number(friend.balance) >= 0 ? "text-[#d9ff72]" : "text-rose-300"}`}>
+                                            {Number(friend.balance) >= 0 ? `${friend.name} owes you ` : `You owe ${friend.name} `}{money(Math.abs(Number(friend.balance || 0)))}
+                                        </p>
+                                        {!isActive && friend.inviteCode && (
+                                            <p className="mt-2 inline-flex rounded-md border border-white/14 bg-white/5 px-2 py-1 text-xs text-white/65">
+                                                Invite code: {friend.inviteCode}
+                                            </p>
+                                        )}
+                                        <div className="mt-3 flex flex-wrap gap-2">
+                                            {!isActive && !isBlocked && <button className="dark-icon-btn px-3 text-xs" onClick={() => updateInvite(friend, "accept")}>Accept</button>}
+                                            {!isRejected && !isBlocked && <button className="dark-icon-btn px-3 text-xs" onClick={() => updateInvite(friend, "reject")}>Reject</button>}
+                                            {!isBlocked && <button className="dark-icon-btn px-3 text-xs" onClick={() => updateStatus(friend.id, "blocked")}>Block</button>}
+                                        </div>
                                     </div>
-                                    <p className={`mt-3 text-xl font-black ${Number(friend.balance) >= 0 ? "text-[#d9ff72]" : "text-rose-300"}`}>
-                                        {Number(friend.balance) >= 0 ? `${friend.name} owes you ` : `You owe ${friend.name} `}{money(Math.abs(Number(friend.balance || 0)))}
-                                    </p>
-                                    {friend.inviteLink && <p className="mt-2 truncate text-xs text-[#d9ff72]">{friend.inviteLink}</p>}
-                                    <div className="mt-3 flex flex-wrap gap-2">
-                                        {friend.status !== "active" && <button className="dark-icon-btn px-3 text-xs" onClick={() => updateInvite(friend, "accept")}>Accept</button>}
-                                        {friend.status !== "rejected" && <button className="dark-icon-btn px-3 text-xs" onClick={() => updateInvite(friend, "reject")}>Reject</button>}
-                                        <button className="dark-icon-btn px-3 text-xs" onClick={() => updateStatus(friend.id, "blocked")}>Block</button>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                             {!loading && friends.length === 0 && <Empty text="Add friends to start splitting expenses." />}
                         </div>
                     </Panel>
